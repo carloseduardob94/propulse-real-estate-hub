@@ -44,6 +44,15 @@ export function PropertyFilterProvider({
   }, [properties]);
 
   useEffect(() => {
+    console.log('Filtering properties with:', {
+      searchTerm, 
+      propertyType, 
+      bedrooms: bedrooms[0], 
+      bathrooms: bathrooms[0], 
+      priceRange, 
+      status
+    });
+
     let result = [...properties];
     
     if (searchTerm) {
@@ -75,10 +84,12 @@ export function PropertyFilterProvider({
       result = result.filter(property => property.status === status);
     }
     
+    console.log('Filtered results:', result.length);
     setFilteredProperties(result);
   }, [properties, searchTerm, propertyType, bedrooms, bathrooms, priceRange, status]);
 
   const resetFilters = () => {
+    console.log('Resetting all filters');
     setSearchTerm("");
     setPropertyType("all");
     setBedrooms([0]);

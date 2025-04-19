@@ -39,7 +39,7 @@ const Index = () => {
             email: data.session.user.email || '',
             avatar_url: profile.avatar_url,
             company_name: profile.company_name,
-            plan: profile.plan || 'free'
+            plan: (profile.plan as "free" | "monthly" | "yearly") || "free"
           });
         } else {
           // Fallback if no profile exists
@@ -49,7 +49,7 @@ const Index = () => {
             email: data.session.user.email || '',
             avatar_url: null,
             company_name: null,
-            plan: 'free'
+            plan: "free"
           });
         }
       }
@@ -77,7 +77,7 @@ const Index = () => {
               email: session.user.email || '',
               avatar_url: profile.avatar_url,
               company_name: profile.company_name,
-              plan: profile.plan || 'free'
+              plan: (profile.plan as "free" | "monthly" | "yearly") || "free"
             });
           } else {
             setUser({
@@ -86,7 +86,7 @@ const Index = () => {
               email: session.user.email || '',
               avatar_url: null,
               company_name: null,
-              plan: 'free'
+              plan: "free"
             });
           }
         } else {

@@ -56,11 +56,13 @@ const transformLeadFromDB = (lead: any): Lead => ({
 const Dashboard = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [user, setUser] = useState({ 
+  const [user, setUser] = useState<UserProfile>({ 
     id: "",
     name: "Usuário Demo", 
     email: "demo@example.com", 
-    plan: "free" as const 
+    plan: "free",
+    avatar_url: null,
+    company_name: null
   });
   
   const [showPropertyForm, setShowPropertyForm] = useState(false);
@@ -108,7 +110,9 @@ const Dashboard = () => {
             id: userData.id,
             name: userData.user_metadata?.name || "Usuário",
             email: userData.email || "sem email",
-            plan: "free" as const
+            plan: "free",
+            avatar_url: userData.user_metadata?.avatar_url || null,
+            company_name: userData.user_metadata?.company_name || null
           });
         }
       } catch (error) {

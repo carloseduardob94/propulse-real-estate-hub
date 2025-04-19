@@ -96,7 +96,14 @@ export default function ProposalsPage() {
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar 
         isAuthenticated={true} 
-        user={{ name: "Usuário Demo", email: "demo@example.com", plan: "free" }} 
+        user={{ 
+          id: "demo-id",
+          name: "Usuário Demo", 
+          email: "demo@example.com", 
+          plan: "free",
+          avatar_url: null,
+          company_name: null
+        }} 
       />
       
       <main className="flex-1 container mx-auto px-4 py-8">

@@ -1,19 +1,20 @@
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
-import { PropertyCard } from "@/components/ui/property-card";
-import { LeadCard } from "@/components/ui/lead-card";
-import { Button } from "@/components/ui/button";
-import { PropertyForm } from "@/components/ui/property-form";
-import { LeadForm } from "@/components/ui/lead-form";
-import { Plus, Home, Users, FileText, Settings, ChevronRight, Check, Inbox } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { Lead, Property } from "@/types";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Property, Lead } from "@/types";
+import { PropertyForm } from "@/components/ui/property-form";
+import { LeadForm } from "@/components/ui/lead-form";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { DashboardStats } from "@/components/dashboard/dashboard-stats";
+import { PropertySection } from "@/components/dashboard/property-section";
+import { LeadSection } from "@/components/dashboard/lead-section";
+import { QuickActions } from "@/components/dashboard/quick-actions";
+import { PremiumPromotion } from "@/components/dashboard/premium-promotion";
 import { useQuery } from "@tanstack/react-query";
 
 const transformPropertyFromDB = (property: any): Property => ({
@@ -91,11 +92,6 @@ const Dashboard = () => {
     }
   });
 
-  const recentProperties = properties.slice(0, 3);
-  const topLeads = leads
-    .sort((a, b) => b.leadScore - a.leadScore)
-    .slice(0, 3);
-
   useEffect(() => {
     const getUserProfile = async () => {
       try {
@@ -141,23 +137,6 @@ const Dashboard = () => {
       });
     }
   };
-
-  const EmptyState = ({ type, message }: { type: 'properties' | 'leads'; message: string }) => (
-    <div className="col-span-full flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed border-muted rounded-lg bg-muted/5">
-      <div className="rounded-full bg-muted/10 p-4 mb-4">
-        <Inbox className="h-8 w-8 text-muted-foreground" />
-      </div>
-      <h3 className="text-lg font-semibold mb-2">Nenhum dado encontrado</h3>
-      <p className="text-muted-foreground text-center mb-4">{message}</p>
-      <Button 
-        onClick={() => type === 'properties' ? setShowPropertyForm(true) : setShowLeadForm(true)}
-        className="bg-propulse-600 hover:bg-propulse-700 text-white"
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        {type === 'properties' ? 'Adicionar Imóvel' : 'Adicionar Lead'}
-      </Button>
-    </div>
-  );
 
   const onLeadSubmit = async (data: any) => {
     try {
@@ -243,105 +222,17 @@ const Dashboard = () => {
       />
       
       <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground">
-              Bem-vindo de volta, {user.name}!
-            </p>
-          </div>
-          <div className="flex gap-3 mt-4 md:mt-0">
-            <Button 
-              onClick={() => setShowPropertyForm(true)}
-              className="bg-propulse-600 hover:bg-propulse-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Imóvel
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={() => setShowLeadForm(true)}
-              className="border-propulse-600 text-propulse-600 hover:bg-propulse-50 shadow-lg hover:shadow-xl transition-all duration-200"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Lead
-            </Button>
-          </div>
-        </div>
+        <DashboardHeader 
+          user={user}
+          onNewProperty={() => setShowPropertyForm(true)}
+          onNewLead={() => setShowLeadForm(true)}
+        />
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total de Imóveis
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Home className="h-5 w-5 text-propulse-600 mr-2" />
-                <div className="text-2xl font-bold">{properties.length}</div>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {user.plan === 'free' ? `${properties.length}/3 imóveis (Plano Free)` : 'Ilimitado'}
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total de Leads
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Users className="h-5 w-5 text-propulse-600 mr-2" />
-                <div className="text-2xl font-bold">{leads.length}</div>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {leads.filter(l => l.leadScore >= 80).length} leads qualificados
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Propostas Geradas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <FileText className="h-5 w-5 text-propulse-600 mr-2" />
-                <div className="text-2xl font-bold">0</div>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {user.plan === 'free' ? '0/1 propostas mensais' : 'Ilimitado'}
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Seu Plano
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Settings className="h-5 w-5 text-propulse-600 mr-2" />
-                <div className="text-2xl font-bold capitalize">
-                  {user.plan === 'free' ? 'Free' : user.plan === 'monthly' ? 'Mensal' : 'Anual'}
-                </div>
-              </div>
-              {user.plan === 'free' && (
-                <Button variant="link" className="text-xs p-0 h-6 mt-1" asChild>
-                  <a href="/plans">Fazer upgrade</a>
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        <DashboardStats 
+          properties={properties}
+          leads={leads}
+          plan={user.plan}
+        />
         
         <Tabs defaultValue="properties" className="mb-8">
           <TabsList className="mb-4">
@@ -350,172 +241,25 @@ const Dashboard = () => {
           </TabsList>
           
           <TabsContent value="properties">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {propertiesLoading ? (
-                <div className="col-span-full text-center py-8">Carregando imóveis...</div>
-              ) : recentProperties.length > 0 ? (
-                recentProperties.map((property) => (
-                  <div 
-                    key={property.id}
-                    className="transition-transform duration-200 hover:scale-[1.02] cursor-pointer group"
-                    onClick={() => navigate(`/properties/${property.id}`)}
-                  >
-                    <div className="relative">
-                      <PropertyCard property={property} />
-                      <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 rounded-lg transition-opacity flex items-center justify-center">
-                        <div className="bg-white/90 px-4 py-2 rounded-full text-sm font-medium">
-                          Ver detalhes
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <EmptyState 
-                  type="properties" 
-                  message="Cadastre seu primeiro imóvel para começar a gerenciar seu portfólio." 
-                />
-              )}
-            </div>
-            
-            {properties.length > 3 && (
-              <div className="text-center mt-6">
-                <Button 
-                  variant="outline" 
-                  className="group hover:border-propulse-600 hover:text-propulse-600"
-                  asChild
-                >
-                  <a href="/properties" className="inline-flex items-center">
-                    Ver todos os imóveis
-                    <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </a>
-                </Button>
-              </div>
-            )}
+            <PropertySection 
+              properties={properties}
+              isLoading={propertiesLoading}
+              onNewProperty={() => setShowPropertyForm(true)}
+            />
           </TabsContent>
           
           <TabsContent value="leads">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {leadsLoading ? (
-                <div className="col-span-full text-center py-8">Carregando leads...</div>
-              ) : topLeads.length > 0 ? (
-                topLeads.map((lead) => (
-                  <div 
-                    key={lead.id}
-                    className="transition-transform duration-200 hover:scale-[1.02] cursor-pointer group"
-                    onClick={() => navigate(`/leads/${lead.id}`)}
-                  >
-                    <div className="relative">
-                      <LeadCard lead={lead} />
-                      <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 rounded-lg transition-opacity flex items-center justify-center">
-                        <div className="bg-white/90 px-4 py-2 rounded-full text-sm font-medium">
-                          Ver detalhes
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <EmptyState 
-                  type="leads" 
-                  message="Adicione seu primeiro lead para começar a gerenciar seus contatos." 
-                />
-              )}
-            </div>
-            
-            {leads.length > 3 && (
-              <div className="text-center mt-6">
-                <Button 
-                  variant="outline" 
-                  className="group hover:border-propulse-600 hover:text-propulse-600"
-                  asChild
-                >
-                  <a href="/leads" className="inline-flex items-center">
-                    Ver todos os leads
-                    <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </a>
-                </Button>
-              </div>
-            )}
+            <LeadSection 
+              leads={leads}
+              isLoading={leadsLoading}
+              onNewLead={() => setShowLeadForm(true)}
+            />
           </TabsContent>
         </Tabs>
         
-        <div className="mb-8">
-          <h2 className="text-xl font-bold mb-4">Ações Rápidas</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Button variant="outline" className="h-auto py-6 justify-start" asChild>
-              <a href="/properties/new" className="inline-flex items-center">
-                <div className="rounded-full bg-propulse-100 p-3 mr-4">
-                  <Home className="h-5 w-5 text-propulse-600" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium">Cadastrar Imóvel</p>
-                  <p className="text-sm text-muted-foreground">Adicione um novo imóvel</p>
-                </div>
-              </a>
-            </Button>
-            
-            <Button variant="outline" className="h-auto py-6 justify-start" asChild>
-              <a href="/leads/new" className="inline-flex items-center">
-                <div className="rounded-full bg-success-100 p-3 mr-4">
-                  <Users className="h-5 w-5 text-success-600" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium">Registrar Lead</p>
-                  <p className="text-sm text-muted-foreground">Cadastre um novo lead</p>
-                </div>
-              </a>
-            </Button>
-            
-            <Button variant="outline" className="h-auto py-6 justify-start" asChild>
-              <a href="/proposals/new" className="inline-flex items-center">
-                <div className="rounded-full bg-blue-100 p-3 mr-4">
-                  <FileText className="h-5 w-5 text-blue-600" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium">Gerar Proposta</p>
-                  <p className="text-sm text-muted-foreground">Crie uma nova proposta</p>
-                </div>
-              </a>
-            </Button>
-          </div>
-        </div>
+        <QuickActions />
         
-        {user.plan === 'free' && (
-          <Card className="bg-propulse-50 border-propulse-200">
-            <CardHeader>
-              <CardTitle>Aumente sua produtividade com o Plano Premium</CardTitle>
-              <CardDescription>
-                Desbloqueie recursos avançados para potencializar seus resultados
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div className="flex items-start gap-2">
-                  <div className="rounded-full bg-propulse-100 p-1 mt-0.5">
-                    <Check className="h-4 w-4 text-propulse-600" />
-                  </div>
-                  <p className="text-sm">Cadastro ilimitado de imóveis</p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <div className="rounded-full bg-propulse-100 p-1 mt-0.5">
-                    <Check className="h-4 w-4 text-propulse-600" />
-                  </div>
-                  <p className="text-sm">Qualificação automática de leads</p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <div className="rounded-full bg-propulse-100 p-1 mt-0.5">
-                    <Check className="h-4 w-4 text-propulse-600" />
-                  </div>
-                  <p className="text-sm">Propostas ilimitadas com exportação em PDF</p>
-                </div>
-              </div>
-              <Button asChild>
-                <a href="/plans">Ver Planos</a>
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+        <PremiumPromotion show={user.plan === 'free'} />
 
         <Sheet open={showPropertyForm} onOpenChange={setShowPropertyForm}>
           <SheetContent className="w-full sm:max-w-[800px] overflow-y-auto">

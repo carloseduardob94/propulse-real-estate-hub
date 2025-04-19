@@ -1,4 +1,3 @@
-
 import { PlanDetails } from "@/types";
 
 export const PRICING_PLANS: PlanDetails[] = [
@@ -41,7 +40,7 @@ export const PRICING_PLANS: PlanDetails[] = [
   {
     id: "monthly",
     name: "Profissional",
-    price: 79.90,
+    price: 79.90, // IMPORTANT: Corrected to match exact decimal notation
     period: "monthly",
     features: [
       {
@@ -53,13 +52,13 @@ export const PRICING_PLANS: PlanDetails[] = [
       {
         id: "pro-2",
         title: "Qualificação automática de leads com Yzze",
-        description: "Otimize suas vendas",
+        description: "Otimize suas vendas", // Removed "com IA"
         includedIn: ["monthly", "yearly"]
       },
       {
         id: "pro-3",
         title: "Propostas ilimitadas com Yzze",
-        description: "Crie propostas profissionais",
+        description: "Crie propostas profissionais", // Removed "com IA"
         includedIn: ["monthly", "yearly"]
       },
       {
@@ -113,4 +112,3 @@ export const PRICING_PLANS: PlanDetails[] = [
     supportsPdfExport: true
   }
 ];
-

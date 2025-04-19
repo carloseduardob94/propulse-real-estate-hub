@@ -16,6 +16,7 @@ import LeadsPage from "./pages/LeadsPage";
 import ProposalsPage from "./pages/ProposalsPage";
 import PlansPage from "./pages/PlansPage";
 import AuthPage from "./pages/AuthPage";
+import ProfilePage from "./pages/ProfilePage";
 
 const queryClient = new QueryClient();
 
@@ -108,6 +109,12 @@ const App = () => {
             <Route 
               path="/plans" 
               element={<PlansPage />} 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                session ? <ProfilePage /> : <Navigate to="/login" replace />
+              } 
             />
             <Route path="*" element={<NotFound />} />
           </Routes>

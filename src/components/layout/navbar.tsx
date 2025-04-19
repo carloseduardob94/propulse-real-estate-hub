@@ -1,20 +1,19 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X, Home, Users, FileText, BadgeDollarSign, LogOut } from "lucide-react";
+import { Menu, X, Home, Users, FileText, BadgeDollarSign, LogOut, UserCog } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/brand/logo";
 import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
+import { UserProfile } from "@/types/auth";
 
 interface NavbarProps {
   isAuthenticated?: boolean;
-  user?: {
-    name: string;
-    email: string;
-    plan: 'free' | 'monthly' | 'yearly';
-  };
+  user?: UserProfile | null;
   onLogout?: () => void;
 }
 
@@ -41,14 +40,41 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
     closeMenu();
   };
 
-  const getPlanBadge = (plan: 'free' | 'monthly' | 'yearly') => {
+  const handleProfileClick = () => {
+    navigate('/profile');
+    closeMenu();
+  };
+
+  // Generate avatar fallback from name
+  const getUserInitials = (name: string | null) => {
+    if (!name) return '?';
+    
+    const nameParts = name.trim().split(' ');
+    if (nameParts.length === 1) return nameParts[0].charAt(0).toUpperCase();
+    
+    return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
+  };
+
+  const getPlanBadge = (plan: 'free' | 'monthly' | 'yearly' | null) => {
     switch (plan) {
       case 'free':
-        return <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">Free</span>;
+        return (
+          <Badge variant="outline" className="ml-2 bg-gray-100 text-gray-600 border-gray-200">
+            Free
+          </Badge>
+        );
       case 'monthly':
-        return <span className="ml-2 text-xs bg-propulse-100 text-propulse-600 px-2 py-1 rounded-full">Mensal</span>;
+        return (
+          <Badge className="ml-2 bg-propulse-100 text-propulse-700 border-propulse-200 hover:bg-propulse-200">
+            Premium
+          </Badge>
+        );
       case 'yearly':
-        return <span className="ml-2 text-xs bg-success-100 text-success-600 px-2 py-1 rounded-full">Anual</span>;
+        return (
+          <Badge className="ml-2 bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200">
+            Premium Anual
+          </Badge>
+        );
       default:
         return null;
     }
@@ -99,19 +125,29 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
           </div>
 
           <div className="border-t py-4">
-            {isAuthenticated ? (
+            {isAuthenticated && user ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-4 px-3">
-                  <Avatar className="border-2 border-propulse-200">
-                    <AvatarImage src={user?.name ? `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random` : undefined} />
-                    <AvatarFallback className="bg-propulse-100 text-propulse-700">{user?.name?.charAt(0) || '?'}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{user?.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-                    {user?.plan && getPlanBadge(user.plan)}
-                  </div>
+                  <button onClick={handleProfileClick} className="flex items-center gap-3 w-full">
+                    <Avatar className="border-2 border-propulse-200">
+                      <AvatarImage src={user.avatar_url || (user.name ? `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random` : undefined)} />
+                      <AvatarFallback className="bg-propulse-100 text-propulse-700">{getUserInitials(user.name)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium">{user.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                      {user.plan && getPlanBadge(user.plan)}
+                    </div>
+                  </button>
                 </div>
+                <Link 
+                  to="/profile" 
+                  className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-muted"
+                  onClick={closeMenu}
+                >
+                  <UserCog className="h-5 w-5 mr-2" />
+                  Editar Perfil
+                </Link>
                 <Button 
                   variant="ghost" 
                   className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
@@ -152,19 +188,27 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
   );
 
   const renderAuthButtons = () => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user) {
       return (
         <div className="hidden md:flex items-center gap-4">
-          <div className="flex items-center gap-3 px-4 py-2 bg-white/50 backdrop-blur-sm rounded-full border shadow-sm">
+          <div 
+            className="flex items-center gap-3 px-4 py-2 bg-white/50 backdrop-blur-sm rounded-full border shadow-sm hover:bg-gray-50 transition-colors cursor-pointer"
+            onClick={handleProfileClick}
+          >
             <Avatar className="h-8 w-8 border-2 border-propulse-100">
-              <AvatarImage src={user?.name ? `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random` : undefined} />
-              <AvatarFallback className="bg-propulse-100 text-propulse-700">{user?.name?.charAt(0) || '?'}</AvatarFallback>
+              <AvatarImage src={user.avatar_url || (user.name ? `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random` : undefined)} />
+              <AvatarFallback className="bg-propulse-100 text-propulse-700">
+                {getUserInitials(user.name)}
+              </AvatarFallback>
             </Avatar>
             <div className="hidden lg:block">
-              <p className="text-sm font-medium">{user?.name}</p>
-              {user?.plan && getPlanBadge(user.plan)}
+              <p className="text-sm font-medium">{user.name}</p>
+              {user.plan && getPlanBadge(user.plan)}
             </div>
-            <Button variant="ghost" size="icon" className="ml-1" onClick={handleLogout}>
+            <Button variant="ghost" size="icon" className="ml-1" onClick={(e) => {
+              e.stopPropagation();
+              handleLogout();
+            }}>
               <LogOut className="h-5 w-5 text-gray-500 hover:text-red-500 transition-colors" />
             </Button>
           </div>

@@ -1,13 +1,25 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface HeroSectionProps {
   isAuthenticated: boolean;
-  onLoginDemo: () => void;
+  onLoginDemo?: () => void;
 }
 
 export const HeroSection = ({ isAuthenticated, onLoginDemo }: HeroSectionProps) => {
+  const navigate = useNavigate();
+  
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    } else if (onLoginDemo) {
+      onLoginDemo();
+    }
+  };
+  
   return (
     <section className="relative bg-gradient-to-br from-propulse-900 via-propulse-800 to-propulse-700 text-white py-12">
       <div className="container mx-auto px-4">
@@ -32,18 +44,16 @@ export const HeroSection = ({ isAuthenticated, onLoginDemo }: HeroSectionProps) 
                 <Button 
                   size="sm" 
                   className="bg-white text-propulse-700 hover:bg-propulse-50 group"
-                  asChild
+                  onClick={() => navigate('/dashboard')}
                 >
-                  <a href="/dashboard">
-                    Acessar Dashboard
-                    <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-1" />
-                  </a>
+                  Acessar Dashboard
+                  <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-1" />
                 </Button>
               ) : (
                 <Button 
                   size="lg" 
                   className="bg-gradient-to-r from-accent via-accent/90 to-accent/80 text-white hover:opacity-90 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-accent/20 font-semibold tracking-wide"
-                  onClick={onLoginDemo}
+                  onClick={handleGetStarted}
                 >
                   Começar agora
                 </Button>

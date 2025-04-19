@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { LeadForm } from "@/components/ui/lead-form";
 import { Check } from "lucide-react";
@@ -9,17 +9,105 @@ import { FeaturedProperties } from "@/components/sections/FeaturedProperties";
 import { FeaturesSection } from "@/components/sections/FeaturesSection";
 import { PricingSection } from "@/components/sections/PricingSection";
 import { Footer } from "@/components/layout/Footer";
+import { supabase } from "@/integrations/supabase/client";
+import { UserProfile } from "@/types/auth";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState({ name: "Usuário Demo", email: "demo@example.com", plan: "free" as const });
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const navigate = useNavigate();
 
-  const handleLogout = () => {
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      
+      if (data.session) {
+        setIsAuthenticated(true);
+        
+        // Get user profile data
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', data.session.user.id)
+          .single();
+          
+        if (profile) {
+          setUser({
+            id: data.session.user.id,
+            name: profile.name || data.session.user.user_metadata?.name || 'Usuário',
+            email: data.session.user.email || '',
+            avatar_url: profile.avatar_url,
+            company_name: profile.company_name,
+            plan: profile.plan || 'free'
+          });
+        } else {
+          // Fallback if no profile exists
+          setUser({
+            id: data.session.user.id,
+            name: data.session.user.user_metadata?.name || 'Usuário',
+            email: data.session.user.email || '',
+            avatar_url: null,
+            company_name: null,
+            plan: 'free'
+          });
+        }
+      }
+    };
+    
+    checkSession();
+    
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        setIsAuthenticated(!!session);
+        
+        if (session) {
+          // Get updated profile on auth change
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+            
+          if (profile) {
+            setUser({
+              id: session.user.id,
+              name: profile.name || session.user.user_metadata?.name || 'Usuário',
+              email: session.user.email || '',
+              avatar_url: profile.avatar_url,
+              company_name: profile.company_name,
+              plan: profile.plan || 'free'
+            });
+          } else {
+            setUser({
+              id: session.user.id,
+              name: session.user.user_metadata?.name || 'Usuário',
+              email: session.user.email || '',
+              avatar_url: null,
+              company_name: null,
+              plan: 'free'
+            });
+          }
+        } else {
+          setUser(null);
+        }
+      }
+    );
+    
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setIsAuthenticated(false);
+    setUser(null);
   };
 
   const handleLoginDemo = () => {
-    setIsAuthenticated(true);
+    navigate('/login');
   };
 
   return (
@@ -42,7 +130,7 @@ const Index = () => {
             <div>
               <h2 className="text-3xl font-bold mb-4">Interessado em conhecer mais?</h2>
               <p className="text-lg mb-6">
-                Deixe seus dados e entraremos em contato para demonstrar como o PropulseHub 
+                Deixe seus dados e entraremos em contato para demonstrar como o MeuCorretorPRO 
                 pode transformar a gestão dos seus negócios imobiliários.
               </p>
               <ul className="space-y-3">

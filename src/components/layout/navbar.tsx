@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X, User, Home, Users, FileText, BadgeDollarSign, LogOut } from "lucide-react";
+import { Menu, X, Home, Users, FileText, BadgeDollarSign, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Logo } from "@/components/brand/logo";
 
 interface NavbarProps {
   isAuthenticated?: boolean;
@@ -57,7 +58,7 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between py-4">
             <Link to="/" className="flex items-center gap-2" onClick={closeMenu}>
-              <span className="font-bold text-xl text-propulse-800">MeuCorretorPRO</span>
+              <Logo />
             </Link>
             <Button variant="ghost" size="icon" onClick={closeMenu}>
               <X className="h-5 w-5" />
@@ -112,7 +113,7 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
                   <Link to="/login" onClick={closeMenu}>Entrar</Link>
                 </Button>
                 <Button variant="outline" asChild>
-                  <Link to="/register" onClick={closeMenu}>Cadastre-se</Link>
+                  <Link to="/login" onClick={() => { setIsMenuOpen(false); }}>Cadastre-se</Link>
                 </Button>
               </div>
             )}
@@ -163,7 +164,7 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
           <Link to="/login">Entrar</Link>
         </Button>
         <Button asChild>
-          <Link to="/register">Cadastre-se</Link>
+          <Link to="/login">Cadastre-se</Link>
         </Button>
       </div>
     );
@@ -174,7 +175,7 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2">
-            <span className="font-bold text-xl text-propulse-800">MeuCorretorPRO</span>
+            <Logo className="h-8 w-auto" />
           </Link>
           {renderDesktopMenu()}
         </div>
@@ -183,5 +184,36 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
         {renderMobileMenu()}
       </div>
     </header>
+  );
+}
+
+function Logo({ className }: { className?: string }) {
+  return (
+    <div className={`flex items-center ${className}`}>
+      <svg
+        width="32"
+        height="32"
+        viewBox="0 0 32 32"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="mr-2"
+      >
+        <rect width="32" height="32" rx="6" fill="#4b4ae4" />
+        <path
+          d="M8 9.33333H12L16 22.6667H20L24 9.33333"
+          stroke="white"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M7 18.6667H25"
+          stroke="white"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        />
+      </svg>
+      <span className="font-bold text-xl text-propulse-800">MeuCorretorPRO</span>
+    </div>
   );
 }

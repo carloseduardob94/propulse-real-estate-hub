@@ -3,8 +3,7 @@ import { Property } from "@/types";
 import { PropertyGridSkeleton } from "./property-grid-skeleton";
 import { PropertyEmptyState } from "./property-empty-state";
 import { PropertyList } from "./property-list";
-import { PropertyPagination } from "./property-pagination";
-import { PropertyGridHeader } from "./property-grid-header";
+import { ReusablePagination } from "@/components/ui/reusable-pagination";
 
 interface PropertyGridProps {
   properties: Property[];
@@ -38,16 +37,18 @@ export function PropertyGrid({
 
   return (
     <>
-      <PropertyGridHeader 
-        indexOfFirstProperty={indexOfFirstProperty}
-        indexOfLastProperty={indexOfLastProperty}
-        totalProperties={properties.length}
-      />
+      <div className="flex justify-between items-center mb-6">
+        <p className="text-muted-foreground">
+          Exibindo <span className="font-medium text-foreground">
+            {indexOfFirstProperty + 1}-{Math.min(indexOfLastProperty, properties.length)}
+          </span> de <span className="font-medium text-foreground">{properties.length}</span> imóveis
+        </p>
+      </div>
       
       <PropertyList properties={currentProperties} />
 
       {totalPages > 1 && (
-        <PropertyPagination
+        <ReusablePagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={onPageChange}

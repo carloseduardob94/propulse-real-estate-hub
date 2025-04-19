@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -12,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Property } from "@/types";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { X, Plus, ImagePlus } from "lucide-react";
 
 const formSchema = z.object({
   title: z.string().min(5, { message: "O título deve ter pelo menos 5 caracteres" }),
@@ -38,6 +39,7 @@ const formSchema = z.object({
   type: z.enum(["apartment", "house", "commercial", "land"]),
   status: z.enum(["forSale", "forRent", "sold", "rented"]),
   featured: z.boolean().default(false),
+  images: z.array(z.string()).min(3, { message: "Adicione pelo menos 3 imagens" }).max(20, { message: "Máximo de 20 imagens permitidas" }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -51,6 +53,7 @@ interface PropertyFormProps {
 export function PropertyForm({ property, onSubmit, className }: PropertyFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [images, setImages] = useState<File[]>([]);
 
   const defaultValues: Partial<FormValues> = property
     ? {
@@ -68,6 +71,7 @@ export function PropertyForm({ property, onSubmit, className }: PropertyFormProp
         type: property.type,
         status: property.status,
         featured: property.featured,
+        images: property.images || [],
       }
     : {
         title: "",
@@ -84,6 +88,7 @@ export function PropertyForm({ property, onSubmit, className }: PropertyFormProp
         type: "apartment",
         status: "forSale",
         featured: false,
+        images: [],
       };
 
   const form = useForm<FormValues>({
@@ -91,26 +96,68 @@ export function PropertyForm({ property, onSubmit, className }: PropertyFormProp
     defaultValues,
   });
 
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newFiles = Array.from(files).slice(0, 20 - images.length);
+      
+      if (images.length + newFiles.length > 20) {
+        toast({
+          title: "Limite de imagens excedido",
+          description: "Você pode adicionar no máximo 20 imagens.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setImages(prev => [...prev, ...newFiles]);
+    }
+  };
+
+  const removeImage = (indexToRemove: number) => {
+    setImages(prev => prev.filter((_, index) => index !== indexToRemove));
+  };
+
   const handleSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
-    
     try {
-      // Simulated delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      const imageUrls = await Promise.all(
+        images.map(async (file) => {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Math.random()}.${fileExt}`;
+          const { data, error } = await supabase.storage
+            .from('property-images')
+            .upload(`${fileName}`, file);
+
+          if (error) throw error;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('property-images')
+            .getPublicUrl(fileName);
+
+          return publicUrl;
+        })
+      );
+
+      const propertyData = {
+        ...values,
+        images: imageUrls,
+      };
+
       if (onSubmit) {
-        onSubmit(values);
+        onSubmit(propertyData);
       }
       
       toast({
         title: property ? "Imóvel atualizado!" : "Imóvel cadastrado!",
         description: property 
-          ? "O imóvel foi atualizado com sucesso."
+          ? "O imóvel foi atualizado com sucesso." 
           : "O imóvel foi cadastrado com sucesso.",
       });
       
       if (!property) {
         form.reset(defaultValues);
+        setImages([]);
       }
     } catch (error) {
       toast({
@@ -329,6 +376,43 @@ export function PropertyForm({ property, onSubmit, className }: PropertyFormProp
                 Destacar imóvel
               </Label>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Imagens do Imóvel</Label>
+            <div className="grid grid-cols-4 gap-2">
+              {images.map((image, index) => (
+                <div key={index} className="relative">
+                  <img 
+                    src={URL.createObjectURL(image)} 
+                    alt={`Imagem ${index + 1}`} 
+                    className="w-full h-20 object-cover rounded-md"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full m-1"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+              {images.length < 20 && (
+                <label className="flex items-center justify-center border-2 border-dashed rounded-md h-20 cursor-pointer hover:bg-gray-100">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleImageUpload}
+                  />
+                  <Plus className="h-6 w-6 text-gray-400" />
+                </label>
+              )}
+            </div>
+            {form.formState.errors.images && (
+              <p className="text-sm text-red-500">{form.formState.errors.images.message}</p>
+            )}
           </div>
         </CardContent>
         <CardFooter>

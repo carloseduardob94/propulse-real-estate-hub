@@ -1,13 +1,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { UserProfile } from "@/types/auth";
 
 interface DashboardHeaderProps {
-  user: {
-    name: string;
-    email: string;
-    plan: "free";
-  };
+  user: UserProfile;
   onNewProperty: () => void;
   onNewLead: () => void;
 }
@@ -18,7 +15,7 @@ export function DashboardHeader({ user, onNewProperty, onNewLead }: DashboardHea
       <div>
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <p className="text-muted-foreground">
-          Bem-vindo de volta, {user.name}!
+          Bem-vindo de volta, {user.name || "Usuário"}!
         </p>
       </div>
       <div className="flex gap-3 mt-4 md:mt-0">

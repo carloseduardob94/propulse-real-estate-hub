@@ -7,12 +7,13 @@ import { AvatarUpload } from "@/components/auth/avatar-upload";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserCog, User, Check, X, Upload, BadgeDollarSign } from "lucide-react";
+import { UserCog, User, Check, X, Upload, BadgeDollarSign, LogOut, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { UserProfile } from "@/types/auth";
+import { User as SupabaseUser } from "@supabase/supabase-js";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -33,9 +34,9 @@ export default function ProfilePage() {
       try {
         setLoading(true);
         
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user: authUser } } = await supabase.auth.getUser();
         
-        if (!user) {
+        if (!authUser) {
           navigate('/login');
           return;
         }
@@ -44,7 +45,7 @@ export default function ProfilePage() {
         const { data: profile, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', user.id)
+          .eq('id', authUser.id)
           .single();
           
         if (error && error.code !== 'PGRST116') {
@@ -53,34 +54,34 @@ export default function ProfilePage() {
         
         if (profile) {
           setUser({
-            id: user.id,
-            name: profile.name || user.user_metadata?.name || 'Usuário',
-            email: user.email || '',
+            id: authUser.id,
+            name: profile.name || authUser.user_metadata?.name || 'Usuário',
+            email: authUser.email || '',
             avatar_url: profile.avatar_url,
             company_name: profile.company_name,
             plan: (profile.plan as "free" | "monthly" | "yearly") || "free"
           });
           
           setFormData({
-            name: profile.name || user.user_metadata?.name || '',
-            email: user.email || '',
+            name: profile.name || authUser.user_metadata?.name || '',
+            email: authUser.email || '',
             company_name: profile.company_name || '',
             avatar_url: profile.avatar_url || '',
           });
         } else {
           // Fallback if no profile exists
           setUser({
-            id: user.id,
-            name: user.user_metadata?.name || 'Usuário',
-            email: user.email || '',
+            id: authUser.id,
+            name: authUser.user_metadata?.name || 'Usuário',
+            email: authUser.email || '',
             avatar_url: null,
             company_name: null,
             plan: "free"
           });
           
           setFormData({
-            name: user.user_metadata?.name || '',
-            email: user.email || '',
+            name: authUser.user_metadata?.name || '',
+            email: authUser.email || '',
             company_name: '',
             avatar_url: '',
           });
@@ -121,7 +122,7 @@ export default function ProfilePage() {
         name: formData.name,
         company_name: formData.company_name,
         avatar_url: formData.avatar_url,
-        updated_at: new Date(),
+        updated_at: new Date().toISOString(),
       };
       
       const { error } = await supabase
@@ -228,7 +229,7 @@ export default function ProfilePage() {
                     </AvatarFallback>
                   </Avatar>
                   <AvatarUpload 
-                    user={user}
+                    user={user as unknown as SupabaseUser}
                     onUploadComplete={(url) => {
                       setFormData(prev => ({ ...prev, avatar_url: url }));
                       setUser(prev => ({ ...prev, avatar_url: url } as UserProfile));

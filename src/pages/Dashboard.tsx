@@ -107,13 +107,19 @@ const Dashboard = () => {
         const userData = session.user;
         
         if (userData) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userData.id)
+            .single();
+            
           setUser({
             id: userData.id,
-            name: userData.user_metadata?.name || "Usuário",
+            name: profile?.name || userData.user_metadata?.name || "Usuário",
             email: userData.email || "sem email",
-            plan: "free",
-            avatar_url: userData.user_metadata?.avatar_url || null,
-            company_name: userData.user_metadata?.company_name || null
+            plan: (profile?.plan as "free" | "monthly" | "yearly") || "free",
+            avatar_url: profile?.avatar_url || null,
+            company_name: profile?.company_name || null
           });
         }
       } catch (error) {

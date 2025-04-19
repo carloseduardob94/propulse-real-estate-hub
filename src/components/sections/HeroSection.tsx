@@ -41,21 +41,13 @@ export const HeroSection = ({ isAuthenticated, onLoginDemo }: HeroSectionProps) 
                 </Button>
               ) : (
                 <Button 
-                  size="sm" 
-                  className="bg-white text-propulse-700 hover:bg-propulse-50"
+                  size="lg" 
+                  className="bg-gradient-to-r from-accent via-accent/90 to-accent/80 text-white hover:opacity-90 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-accent/20 font-semibold tracking-wide"
                   onClick={onLoginDemo}
                 >
                   Começar agora
                 </Button>
               )}
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="border-white text-white hover:bg-white/10"
-                asChild
-              >
-                <a href="#features">Saiba mais</a>
-              </Button>
             </div>
           </div>
           <div className="relative md:flex items-center justify-center">
@@ -68,8 +60,8 @@ export const HeroSection = ({ isAuthenticated, onLoginDemo }: HeroSectionProps) 
                   className="w-full h-auto object-contain rounded-lg transform hover:scale-105 transition-transform duration-300 max-h-[300px]"
                 />
               </div>
-              <div className="absolute -bottom-2 -left-2 bg-white/10 backdrop-blur-lg rounded-lg p-2 border border-white/20">
-                <p className="text-xs font-medium">
+              <div className="absolute -bottom-2 -left-2 bg-white/15 backdrop-blur-lg rounded-lg p-3 border border-white/20">
+                <p className="text-sm font-semibold tracking-wide">
                   Conheça Yzze, sua parceira inteligente
                 </p>
               </div>

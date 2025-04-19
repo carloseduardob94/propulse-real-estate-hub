@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { PricingCard } from "@/components/ui/pricing-card";
-import { PRICING_PLANS } from "@/data/mock-data";
+import { PRICING_PLANS } from "@/data/pricing-plans";
 
 export const PricingSection = () => {
   return (

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { PropertyCardWithSlider } from "@/components/ui/property-card-with-slider";
@@ -6,7 +5,7 @@ import { PricingCard } from "@/components/ui/pricing-card";
 import { Button } from "@/components/ui/button";
 import { LeadForm } from "@/components/ui/lead-form";
 import { MOCK_PROPERTIES, PRICING_PLANS } from "@/data/mock-data";
-import { Home, Users, FileText, ChevronRight, Check, ArrowRight } from "lucide-react";
+import { Home, Users, FileText, ChevronRight, Check, ArrowRight, Star } from "lucide-react";
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -30,17 +29,24 @@ const Index = () => {
         onLogout={handleLogout} 
       />
       
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-propulse-900 to-propulse-700 text-white py-20">
+      {/* Hero Section with Yzze */}
+      <section className="relative bg-gradient-to-br from-propulse-900 via-propulse-800 to-propulse-700 text-white py-24">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8">
               <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-                Transforme a gestão dos seus imóveis e leads
+                Transforme a gestão dos seus imóveis e leads com uma plataforma completa e{' '}
+                <span className="relative inline-block">
+                  <span className="relative z-10 bg-gradient-to-r from-accent to-accent/70 bg-clip-text text-transparent">
+                    inteligente
+                  </span>
+                  <Star className="absolute -right-7 -top-4 h-5 w-5 text-accent animate-pulse" />
+                </span>
               </h1>
-              <p className="text-xl text-propulse-100">
-                Plataforma completa para corretores e imobiliárias organizarem imóveis, 
-                qualificarem leads e gerarem propostas profissionais.
+              <p className="text-xl text-propulse-100 leading-relaxed">
+                Aumente sua produtividade, organize imóveis, qualifique leads e gere propostas 
+                profissionais com agilidade e precisão — tudo isso com a aliada ideal dos 
+                corretores e imobiliárias.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 {isAuthenticated ? (
@@ -66,23 +72,37 @@ const Index = () => {
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="border-white text-white hover:bg-white/10 hover:border-white transition-colors"
+                  className="border-white text-white hover:bg-white/10"
                   asChild
                 >
                   <a href="#features">Saiba mais</a>
                 </Button>
               </div>
             </div>
-            <div className="hidden md:block relative">
-              <div className="absolute -bottom-16 -right-8 w-full max-w-lg">
-                <img 
-                  src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&auto=format&fit=crop" 
-                  alt="Dashboard Preview" 
-                  className="rounded-lg shadow-xl"
-                />
+            <div className="relative hidden md:block">
+              <div className="absolute -right-8 w-full max-w-xl">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-propulse-900/30 to-transparent rounded-lg" />
+                  <img 
+                    src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&auto=format&fit=crop&q=80" 
+                    alt="Yzze, seu assistente virtual" 
+                    className="w-full h-auto rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <div className="absolute -bottom-4 -left-4 bg-white/10 backdrop-blur-lg rounded-lg p-4 border border-white/20">
+                  <p className="text-sm font-medium">
+                    Conheça Yzze, sua parceira inteligente na gestão imobiliária
+                  </p>
+                </div>
               </div>
             </div>
           </div>
+        </div>
+        
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-64 h-64 bg-accent/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-propulse-600/10 rounded-full blur-3xl" />
         </div>
       </section>
       

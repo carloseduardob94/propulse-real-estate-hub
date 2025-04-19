@@ -1,0 +1,64 @@
+
+import { Property } from "@/types";
+import { PropertyCardWithSlider } from "@/components/ui/property-card-with-slider";
+import { Info } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ReusablePagination } from "@/components/ui/reusable-pagination";
+
+interface PropertyGridProps {
+  properties: Property[];
+  currentPage: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
+  onResetFilters: () => void;
+}
+
+export function PropertyGrid({
+  properties,
+  currentPage,
+  itemsPerPage,
+  onPageChange,
+  onResetFilters
+}: PropertyGridProps) {
+  const indexOfLastProperty = currentPage * itemsPerPage;
+  const indexOfFirstProperty = indexOfLastProperty - itemsPerPage;
+  const currentProperties = properties.slice(indexOfFirstProperty, indexOfLastProperty);
+  const totalPages = Math.ceil(properties.length / itemsPerPage);
+
+  if (properties.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <Info className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+        <h2 className="text-xl font-semibold mb-2">Nenhum imóvel encontrado</h2>
+        <p className="text-muted-foreground mb-6">Tente ajustar os filtros para ver mais resultados.</p>
+        <Button onClick={onResetFilters}>Limpar filtros</Button>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="flex justify-between items-center mb-6">
+        <p className="text-muted-foreground">
+          Exibindo <span className="font-medium text-foreground">
+            {indexOfFirstProperty + 1}-{Math.min(indexOfLastProperty, properties.length)}
+          </span> de <span className="font-medium text-foreground">{properties.length}</span> imóveis
+        </p>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {currentProperties.map((property) => (
+          <PropertyCardWithSlider key={property.id} property={property} />
+        ))}
+      </div>
+
+      {totalPages > 1 && (
+        <ReusablePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+        />
+      )}
+    </>
+  );
+}

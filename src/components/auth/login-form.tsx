@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   email: z.string().email({ message: "E-mail inválido" }),
@@ -105,7 +106,7 @@ export function LoginForm({ onSubmit, onRegisterClick, className }: LoginFormPro
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder="��•••••••"
                 {...form.register("password")}
               />
               <Button

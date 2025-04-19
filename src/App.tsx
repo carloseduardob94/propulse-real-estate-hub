@@ -1,12 +1,22 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { createClient } from '@supabase/supabase-js';
 import { useEffect, useState } from "react";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import Index from "./pages/Index";
+import NotFound from "./pages/NotFound";
+import LoginPage from "./pages/LoginPage";
+import Dashboard from "./pages/Dashboard";
+import PropertyDetails from "./pages/PropertyDetails";
+import PropertyCatalog from "./pages/PropertyCatalog";
+import LeadsPage from "./pages/LeadsPage";
+import ProposalsPage from "./pages/ProposalsPage";
+import PlansPage from "./pages/PlansPage";
+import AuthPage from "./pages/AuthPage";
 
 const queryClient = new QueryClient();
 
@@ -27,12 +37,14 @@ const App = () => {
     });
 
     // Configure session persistence for 7 days
-    supabase.auth.setSession({
-      access_token: session?.access_token || '',
-      refresh_token: session?.refresh_token || '',
-    }, {
-      expiresIn: 604800 // 7 days in seconds
-    });
+    if (session) {
+      supabase.auth.setSession({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+      }, {
+        expiresIn: 604800 // 7 days in seconds
+      });
+    }
 
     return () => subscription.unsubscribe();
   }, [session]);

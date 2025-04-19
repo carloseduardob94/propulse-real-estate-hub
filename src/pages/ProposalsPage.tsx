@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Plus } from "lucide-react";
 import { Navbar } from "@/components/layout/navbar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Plus, User, CalendarIcon, ArrowUpRight, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { supabase } from "@/integrations/supabase/client";
 import { UserProfile } from "@/types/auth";
-import { useNavigate } from "react-router-dom";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { supabase } from "@/integrations/supabase/client";
+import { ProposalList } from "@/components/proposals/ProposalList";
 
 const MOCK_PROPOSALS = [
   {
@@ -151,7 +150,7 @@ export default function ProposalsPage() {
       </div>
     </div>
   );
-  
+
   const indexOfLastProposal = currentPage * itemsPerPage;
   const indexOfFirstProposal = indexOfLastProposal - itemsPerPage;
   const currentProposals = proposals.slice(indexOfFirstProposal, indexOfLastProposal);
@@ -198,91 +197,12 @@ export default function ProposalsPage() {
           </Dialog>
         </div>
         
-        {/* Proposals grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {currentProposals.map((proposal) => (
-            <Card key={proposal.id} className="overflow-hidden hover:shadow-md transition-shadow">
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-propulse-100 p-2 rounded-full">
-                      <FileText className="h-6 w-6 text-propulse-600" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg">{proposal.title}</CardTitle>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`px-2 py-0.5 rounded-full text-xs ${getStatusBadgeClass(proposal.status)}`}>
-                          {getStatusLabel(proposal.status)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardHeader>
-              
-              <CardContent>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <span>Cliente: {proposal.clientName}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                    <span>Criada em: {new Date(proposal.createdAt).toLocaleDateString('pt-BR')}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span>{proposal.propertyCount} imóveis incluídos</span>
-                  </div>
-                  
-                  <div className="flex gap-2 mt-4">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <ArrowUpRight className="h-4 w-4 mr-2" />
-                      Visualizar
-                    </Button>
-                    <Button size="sm" className="flex-1">
-                      <Download className="h-4 w-4 mr-2" />
-                      Baixar PDF
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {totalPages > 1 && (
-          <div className="mt-8 flex justify-center">
-            <Pagination>
-              <PaginationContent>
-                {currentPage > 1 && (
-                  <PaginationItem>
-                    <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} />
-                  </PaginationItem>
-                )}
-
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <PaginationItem key={page}>
-                    <PaginationLink
-                      onClick={() => handlePageChange(page)}
-                      isActive={currentPage === page}
-                    >
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                ))}
-
-                {currentPage < totalPages && (
-                  <PaginationItem>
-                    <PaginationNext onClick={() => handlePageChange(currentPage + 1)} />
-                  </PaginationItem>
-                )}
-              </PaginationContent>
-            </Pagination>
-          </div>
-        )}
+        <ProposalList
+          proposals={proposals}
+          currentPage={currentPage}
+          itemsPerPage={itemsPerPage}
+          onPageChange={handlePageChange}
+        />
       </main>
       
       <footer className="py-6 bg-white border-t">

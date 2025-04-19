@@ -5,8 +5,7 @@ import { LeadCard } from "@/components/ui/lead-card";
 import { Button } from "@/components/ui/button";
 import { PropertyForm } from "@/components/ui/property-form";
 import { LeadForm } from "@/components/ui/lead-form";
-import { MOCK_PROPERTIES, MOCK_LEADS } from "@/data/mock-data";
-import { Plus, Home, Users, FileText, Settings, ChevronRight, Check } from "lucide-react";
+import { Plus, Home, Users, FileText, Settings, ChevronRight, Check, Inbox } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Lead, Property } from "@/types";
+import { useQuery } from "@tanstack/react-query";
 
 const Dashboard = () => {
   const { toast } = useToast();
@@ -24,16 +25,39 @@ const Dashboard = () => {
     plan: "free" as const 
   });
   
-  const [properties, setProperties] = useState(MOCK_PROPERTIES);
-  const [leads, setLeads] = useState(MOCK_LEADS);
-  
+  const [showPropertyForm, setShowPropertyForm] = useState(false);
+  const [showLeadForm, setShowLeadForm] = useState(false);
+
+  const { data: properties = [], isLoading: propertiesLoading } = useQuery({
+    queryKey: ['properties'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as Property[];
+    }
+  });
+
+  const { data: leads = [], isLoading: leadsLoading } = useQuery({
+    queryKey: ['leads'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('leads')
+        .select('*')
+        .order('lead_score', { ascending: false });
+      
+      if (error) throw error;
+      return data as Lead[];
+    }
+  });
+
   const recentProperties = properties.slice(0, 3);
   const topLeads = leads
     .sort((a, b) => b.leadScore - a.leadScore)
     .slice(0, 3);
-  
-  const [showPropertyForm, setShowPropertyForm] = useState(false);
-  const [showLeadForm, setShowLeadForm] = useState(false);
 
   useEffect(() => {
     const getUserProfile = async () => {
@@ -41,11 +65,9 @@ const Dashboard = () => {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
-          // Don't navigate here, that's handled by the router in App.tsx
           return;
         }
         
-        // Update user info from session
         const userData = session.user;
         
         if (userData) {
@@ -72,8 +94,6 @@ const Dashboard = () => {
         title: "Logout realizado com sucesso!",
         description: "Você foi desconectado da sua conta.",
       });
-      
-      // Navigate will happen automatically due to auth state change
     } catch (error: any) {
       console.error("Logout error:", error);
       toast({
@@ -84,20 +104,65 @@ const Dashboard = () => {
     }
   };
 
-  const onLeadSubmit = (data: any) => {
-    toast({
-      title: "Lead cadastrado com sucesso!",
-      description: "O lead foi adicionado à sua lista.",
-    });
-    setShowLeadForm(false);
+  const EmptyState = ({ type, message }: { type: 'properties' | 'leads'; message: string }) => (
+    <div className="col-span-full flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed border-muted rounded-lg bg-muted/5">
+      <div className="rounded-full bg-muted/10 p-4 mb-4">
+        <Inbox className="h-8 w-8 text-muted-foreground" />
+      </div>
+      <h3 className="text-lg font-semibold mb-2">Nenhum dado encontrado</h3>
+      <p className="text-muted-foreground text-center mb-4">{message}</p>
+      <Button 
+        onClick={() => type === 'properties' ? setShowPropertyForm(true) : setShowLeadForm(true)}
+        className="bg-propulse-600 hover:bg-propulse-700 text-white"
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        {type === 'properties' ? 'Adicionar Imóvel' : 'Adicionar Lead'}
+      </Button>
+    </div>
+  );
+
+  const onLeadSubmit = async (data: any) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .insert([{ ...data, user_id: user.id }]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Lead cadastrado com sucesso!",
+        description: "O lead foi adicionado à sua lista.",
+      });
+      setShowLeadForm(false);
+    } catch (error: any) {
+      toast({
+        title: "Erro ao cadastrar lead",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
-  const onPropertySubmit = (data: any) => {
-    toast({
-      title: "Imóvel cadastrado com sucesso!",
-      description: "O imóvel foi adicionado ao seu catálogo.",
-    });
-    setShowPropertyForm(false);
+  const onPropertySubmit = async (data: any) => {
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .insert([{ ...data, user_id: user.id }]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Imóvel cadastrado com sucesso!",
+        description: "O imóvel foi adicionado ao seu catálogo.",
+      });
+      setShowPropertyForm(false);
+    } catch (error: any) {
+      toast({
+        title: "Erro ao cadastrar imóvel",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -217,23 +282,36 @@ const Dashboard = () => {
           
           <TabsContent value="properties">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recentProperties.length > 0 ? (
+              {propertiesLoading ? (
+                <div className="col-span-full text-center py-8">Carregando imóveis...</div>
+              ) : recentProperties.length > 0 ? (
                 recentProperties.map((property) => (
-                  <PropertyCard key={property.id} property={property} />
+                  <div 
+                    key={property.id}
+                    className="transition-transform duration-200 hover:scale-[1.02] cursor-pointer"
+                    onClick={() => navigate(`/properties/${property.id}`)}
+                  >
+                    <PropertyCard property={property} />
+                  </div>
                 ))
               ) : (
-                <div className="col-span-full py-10 text-center text-muted-foreground">
-                  Nenhum imóvel cadastrado ainda.
-                </div>
+                <EmptyState 
+                  type="properties" 
+                  message="Cadastre seu primeiro imóvel para começar a gerenciar seu portfólio." 
+                />
               )}
             </div>
             
             {properties.length > 3 && (
               <div className="text-center mt-6">
-                <Button variant="outline" asChild>
+                <Button 
+                  variant="outline" 
+                  className="group hover:border-propulse-600 hover:text-propulse-600"
+                  asChild
+                >
                   <a href="/properties" className="inline-flex items-center">
                     Ver todos os imóveis
-                    <ChevronRight className="ml-2 h-4 w-4" />
+                    <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </a>
                 </Button>
               </div>
@@ -242,23 +320,36 @@ const Dashboard = () => {
           
           <TabsContent value="leads">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {topLeads.length > 0 ? (
+              {leadsLoading ? (
+                <div className="col-span-full text-center py-8">Carregando leads...</div>
+              ) : topLeads.length > 0 ? (
                 topLeads.map((lead) => (
-                  <LeadCard key={lead.id} lead={lead} />
+                  <div 
+                    key={lead.id}
+                    className="transition-transform duration-200 hover:scale-[1.02] cursor-pointer"
+                    onClick={() => navigate(`/leads/${lead.id}`)}
+                  >
+                    <LeadCard lead={lead} />
+                  </div>
                 ))
               ) : (
-                <div className="col-span-full py-10 text-center text-muted-foreground">
-                  Nenhum lead cadastrado ainda.
-                </div>
+                <EmptyState 
+                  type="leads" 
+                  message="Adicione seu primeiro lead para começar a gerenciar seus contatos." 
+                />
               )}
             </div>
             
             {leads.length > 3 && (
               <div className="text-center mt-6">
-                <Button variant="outline" asChild>
+                <Button 
+                  variant="outline" 
+                  className="group hover:border-propulse-600 hover:text-propulse-600"
+                  asChild
+                >
                   <a href="/leads" className="inline-flex items-center">
                     Ver todos os leads
-                    <ChevronRight className="ml-2 h-4 w-4" />
+                    <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </a>
                 </Button>
               </div>

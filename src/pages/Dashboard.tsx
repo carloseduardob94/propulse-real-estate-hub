@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { PropertyCard } from "@/components/ui/property-card";
 import { LeadCard } from "@/components/ui/lead-card";
@@ -9,9 +8,12 @@ import { Plus, Home, Users, FileText, Settings, ChevronRight, Check } from "luci
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [user, setUser] = useState({ 
     name: "Usuário Demo", 
     email: "demo@example.com", 
@@ -26,12 +28,36 @@ const Dashboard = () => {
     .sort((a, b) => b.leadScore - a.leadScore)
     .slice(0, 3);
   
-  const handleLogout = () => {
-    toast({
-      title: "Logout realizado com sucesso!",
-      description: "Você foi desconectado da sua conta.",
-    });
-    // In a real app, would redirect to login page
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        navigate('/login');
+      }
+    };
+    
+    checkAuth();
+  }, [navigate]);
+  
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Logout realizado com sucesso!",
+        description: "Você foi desconectado da sua conta.",
+      });
+      
+      navigate('/login');
+    } catch (error: any) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Erro ao fazer logout",
+        description: error.message || "Ocorreu um erro ao desconectar.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -66,7 +92,6 @@ const Dashboard = () => {
           </div>
         </div>
         
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="pb-2">
@@ -141,7 +166,6 @@ const Dashboard = () => {
           </Card>
         </div>
         
-        {/* Tabs for Properties and Leads */}
         <Tabs defaultValue="properties" className="mb-8">
           <TabsList className="mb-4">
             <TabsTrigger value="properties">Imóveis Recentes</TabsTrigger>
@@ -199,7 +223,6 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
         
-        {/* Quick Actions */}
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4">Ações Rápidas</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -241,7 +264,6 @@ const Dashboard = () => {
           </div>
         </div>
         
-        {/* Plan Upgrade Card (show only for free plan) */}
         {user.plan === 'free' && (
           <Card className="bg-propulse-50 border-propulse-200">
             <CardHeader>

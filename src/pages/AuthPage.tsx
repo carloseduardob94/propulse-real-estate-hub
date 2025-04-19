@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { LoginForm } from "@/components/auth/login-form";
 import { RegisterForm } from "@/components/auth/register-form";
 import { useToast } from "@/hooks/use-toast";
@@ -14,22 +14,9 @@ const AuthPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  useEffect(() => {
-    // Check if the user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate('/dashboard');
-    });
-
-    // Set up auth listener
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) navigate('/dashboard');
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
+  // We don't need the useEffect for redirection check here anymore
+  // as the routing in App.tsx will handle this redirection
+  
   const handleLogin = async (data: any) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -43,6 +30,9 @@ const AuthPage = () => {
         title: "Login realizado com sucesso!",
         description: "Redirecionando para o dashboard...",
       });
+      
+      // Navigate programmatically after successful login
+      navigate('/dashboard');
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
@@ -70,7 +60,9 @@ const AuthPage = () => {
       });
 
       if (error) throw error;
-
+      
+      // Don't redirect automatically after registration
+      // Just show a success message and let the user login
       toast({
         title: "Cadastro realizado com sucesso!",
         description: "Você já pode fazer login com suas credenciais.",

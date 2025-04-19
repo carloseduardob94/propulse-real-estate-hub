@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X, Home, Users, FileText, BadgeDollarSign, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/brand/logo";
+import { supabase } from "@/integrations/supabase/client";
 
 interface NavbarProps {
   isAuthenticated?: boolean;
@@ -20,9 +21,24 @@ interface NavbarProps {
 export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   const closeMenu = () => {
     setIsMenuOpen(false);
+  };
+
+  const handleLogout = async () => {
+    if (onLogout) {
+      onLogout();
+    } else {
+      try {
+        await supabase.auth.signOut();
+        navigate('/login');
+      } catch (error) {
+        console.error("Logout error:", error);
+      }
+    }
+    closeMenu();
   };
 
   const getPlanBadge = (plan: 'free' | 'monthly' | 'yearly') => {
@@ -99,10 +115,7 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
                 <Button 
                   variant="ghost" 
                   className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
-                  onClick={() => {
-                    if (onLogout) onLogout();
-                    closeMenu();
-                  }}
+                  onClick={handleLogout}
                 >
                   <LogOut className="h-5 w-5 mr-2" />
                   Sair
@@ -114,7 +127,7 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
                   <Link to="/login" onClick={closeMenu}>Entrar</Link>
                 </Button>
                 <Button variant="outline" asChild>
-                  <Link to="/login" onClick={() => { setIsMenuOpen(false); }}>Cadastre-se</Link>
+                  <Link to="/login" onClick={closeMenu}>Cadastre-se</Link>
                 </Button>
               </div>
             )}
@@ -151,7 +164,7 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
               <p className="text-sm font-medium">{user?.name}</p>
               {user?.plan && getPlanBadge(user.plan)}
             </div>
-            <Button variant="ghost" size="icon" className="ml-1" onClick={onLogout}>
+            <Button variant="ghost" size="icon" className="ml-1" onClick={handleLogout}>
               <LogOut className="h-5 w-5 text-gray-500 hover:text-red-500 transition-colors" />
             </Button>
           </div>

@@ -9,7 +9,6 @@ import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
 import PropertyDetails from "./pages/PropertyDetails";
 import PropertyCatalog from "./pages/PropertyCatalog";
@@ -22,11 +21,13 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setIsLoading(false);
     });
 
     // Listen for auth changes and update session
@@ -45,6 +46,11 @@ const App = () => {
     return () => subscription.unsubscribe();
   }, [session]);
 
+  if (isLoading) {
+    // You could add a loading spinner here if desired
+    return null;
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -53,7 +59,12 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/login" element={<AuthPage />} />
+            <Route 
+              path="/login" 
+              element={
+                session ? <Navigate to="/dashboard" replace /> : <AuthPage />
+              } 
+            />
             <Route 
               path="/dashboard" 
               element={

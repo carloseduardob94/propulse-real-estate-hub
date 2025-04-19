@@ -1,7 +1,7 @@
 
 import { Property } from "@/types";
 import { PropertyCardWithSlider } from "@/components/ui/property-card-with-slider";
-import { Info } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReusablePagination } from "@/components/ui/reusable-pagination";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -44,11 +44,22 @@ export function PropertyGrid({
 
   if (properties.length === 0) {
     return (
-      <div className="text-center py-12">
-        <Info className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-        <h2 className="text-xl font-semibold mb-2">Nenhum imóvel encontrado</h2>
-        <p className="text-muted-foreground mb-6">Tente ajustar os filtros para ver mais resultados.</p>
-        <Button onClick={onResetFilters}>Limpar filtros</Button>
+      <div className="flex flex-col items-center justify-center py-16 px-4">
+        <img 
+          src="/lovable-uploads/1e820eef-1dc6-45a5-b3cb-a00ca35ec455.png"
+          alt="No properties found"
+          className="w-64 h-64 mb-8"
+        />
+        <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+          Nenhum imóvel encontrado
+        </h2>
+        <p className="text-gray-600 text-center mb-6 max-w-md">
+          Adicione novos imóveis usando o botão "Novo Imóvel" acima.
+        </p>
+        <Button onClick={onResetFilters} variant="outline" className="min-w-[200px]">
+          <Plus className="mr-2 h-4 w-4" />
+          Limpar filtros
+        </Button>
       </div>
     );
   }

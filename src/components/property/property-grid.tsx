@@ -1,7 +1,7 @@
 
 import { Property } from "@/types";
 import { PropertyCardWithSlider } from "@/components/ui/property-card-with-slider";
-import { Plus } from "lucide-react";
+import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReusablePagination } from "@/components/ui/reusable-pagination";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,36 +30,32 @@ export function PropertyGrid({
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center p-12">
-        <div className="w-full max-w-md">
-          <div className="space-y-3">
-            <Skeleton className="h-8 w-3/4" />
-            <Skeleton className="h-6 w-full" />
-            <Skeleton className="h-6 w-2/3" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="rounded-lg overflow-hidden border border-gray-200">
+            <Skeleton className="w-full h-48" />
+            <div className="p-4 space-y-2">
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-4 w-2/3" />
+              <div className="pt-2 flex justify-between">
+                <Skeleton className="h-8 w-20" />
+                <Skeleton className="h-8 w-20" />
+              </div>
+            </div>
           </div>
-        </div>
+        ))}
       </div>
     );
   }
 
   if (properties.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 px-4">
-        <img 
-          src="/lovable-uploads/1e820eef-1dc6-45a5-b3cb-a00ca35ec455.png"
-          alt="No properties found"
-          className="w-64 h-64 mb-8"
-        />
-        <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-          Nenhum imóvel encontrado
-        </h2>
-        <p className="text-gray-600 text-center mb-6 max-w-md">
-          Adicione novos imóveis usando o botão "Novo Imóvel" acima.
-        </p>
-        <Button onClick={onResetFilters} variant="outline" className="min-w-[200px]">
-          <Plus className="mr-2 h-4 w-4" />
-          Limpar filtros
-        </Button>
+      <div className="text-center py-12">
+        <Info className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+        <h2 className="text-xl font-semibold mb-2">Nenhum imóvel encontrado</h2>
+        <p className="text-muted-foreground mb-6">Tente ajustar os filtros para ver mais resultados.</p>
+        <Button onClick={onResetFilters}>Limpar filtros</Button>
       </div>
     );
   }

@@ -1,22 +1,172 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { PropertyDialog } from "@/components/property/property-dialog";
+import { UserProfile } from "@/types/auth";
+import { supabase } from "@/integrations/supabase/client";
+import { PropertyFilters } from "@/components/property/property-filters";
+import { PropertyGrid } from "@/components/property/property-grid";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { PropertyFilterProvider } from "@/components/property/property-filter-context";
-import { PropertyCatalogHeader } from "@/components/property/property-catalog-header";
-import { PropertyContent } from "@/components/property/property-content";
-import { useAuthProfile } from "@/hooks/use-auth-profile";
+import { useToast } from "@/hooks/use-toast";
+import { PropertyDialog } from "@/components/property/property-dialog";
 import { useProperties } from "@/hooks/use-properties";
-import { getUserSlug } from "@/utils/user-utils";
+import { PropertyFilterProvider, usePropertyFilters } from "@/components/property/property-filter-context";
+import { PropertyCatalogHeader } from "@/components/property/property-catalog-header";
+
+function PropertyContent({ properties, isLoading }: { properties: any[], isLoading: boolean }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const {
+    filteredProperties,
+    searchTerm,
+    setSearchTerm,
+    propertyType,
+    setPropertyType,
+    bedrooms,
+    setBedrooms,
+    bathrooms,
+    setBathrooms,
+    priceRange,
+    setPriceRange,
+    status,
+    setStatus,
+    resetFilters
+  } = usePropertyFilters();
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const itemsPerPage = 9;
+
+  return (
+    <>
+      <PropertyFilters
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        propertyType={propertyType}
+        setPropertyType={setPropertyType}
+        bedrooms={bedrooms}
+        setBedrooms={setBedrooms}
+        bathrooms={bathrooms}
+        setBathrooms={setBathrooms}
+        priceRange={priceRange}
+        setPriceRange={setPriceRange}
+        status={status}
+        setStatus={setStatus}
+        onResetFilters={resetFilters}
+      />
+      
+      <PropertyGrid
+        properties={filteredProperties}
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        onPageChange={handlePageChange}
+        onResetFilters={resetFilters}
+        isLoading={isLoading}
+      />
+    </>
+  );
+}
 
 export default function PropertyCatalog() {
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const { user, isAuthenticated, handleLogout } = useAuthProfile();
-  const { properties, isLoading, addProperty } = useProperties(user.id);
+
+  const [user, setUser] = useState<UserProfile>({
+    id: "",
+    name: "", 
+    email: "", 
+    plan: "free",
+    avatar_url: null,
+    company_name: null
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const { properties, isLoading, fetchProperties, addProperty } = useProperties(user.id);
+
+  useEffect(() => {
+    const getUserProfile = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          const userData = session.user;
+          setIsAuthenticated(true);
+          
+          if (userData) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', userData.id)
+              .single();
+              
+            setUser({
+              id: userData.id,
+              name: profile?.name || userData.user_metadata?.name || "Usuário",
+              email: userData.email || "sem email",
+              plan: (profile?.plan as "free" | "monthly" | "yearly") || "free",
+              avatar_url: profile?.avatar_url || null,
+              company_name: profile?.company_name || null
+            });
+
+            fetchProperties(userData.id);
+          }
+        } else {
+          navigate('/login');
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar seu perfil",
+          variant: "destructive"
+        });
+      }
+    };
+    
+    getUserProfile();
+  }, [navigate, toast]);
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      navigate('/login');
+    } catch (error: any) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Erro",
+        description: "Falha ao fazer logout",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleShareCatalog = () => {
+    const url = window.location.href;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: "Catálogo de Imóveis - MeuCorretorPRO",
+        text: "Confira nosso catálogo de imóveis:",
+        url: url,
+      }).catch((error) => console.log('Error sharing', error));
+    } else {
+      navigator.clipboard.writeText(url).then(() => {
+        toast({
+          title: "Link copiado!",
+          description: "Link do catálogo copiado para a área de transferência."
+        });
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+      });
+    }
+  };
 
   const onPropertySubmit = async (data: any) => {
     const success = await addProperty(data);
@@ -45,6 +195,16 @@ export default function PropertyCatalog() {
     </Dialog>
   );
 
+  const getUserSlug = (profile: UserProfile) => {
+    const baseSlug = profile.company_name || profile.name || profile.id;
+    return baseSlug.toLowerCase()
+      .replace(/\s+/g, '-')           // Replace spaces with -
+      .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+      .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+      .replace(/^-+/, '')             // Trim - from start of text
+      .replace(/-+$/, '');            // Trim - from end of text
+  };
+
   return (
     <PageLayout
       isAuthenticated={isAuthenticated}
@@ -61,11 +221,8 @@ export default function PropertyCatalog() {
       />
       
       <PropertyFilterProvider properties={properties}>
-        <PropertyContent 
-          properties={properties} 
-          isLoading={isLoading} 
-          showFilters={showFilters} 
-        />
+        {showFilters && <PropertyContent properties={properties} isLoading={isLoading} />}
+        {!showFilters && <PropertyContent properties={properties} isLoading={isLoading} />}
       </PropertyFilterProvider>
     </PageLayout>
   );

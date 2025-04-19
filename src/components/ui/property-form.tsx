@@ -48,9 +48,10 @@ interface PropertyFormProps {
   property?: Property;
   onSubmit?: (data: FormValues) => void;
   className?: string;
+  onCancel?: () => void;
 }
 
-export function PropertyForm({ property, onSubmit, className }: PropertyFormProps) {
+export function PropertyForm({ property, onSubmit, className, onCancel }: PropertyFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [images, setImages] = useState<File[]>([]);
@@ -121,7 +122,9 @@ export function PropertyForm({ property, onSubmit, className }: PropertyFormProp
   };
 
   const handleSubmit = async (values: FormValues) => {
-    if (images.length < 3 && (!property || !property.images || property.images.length < 3)) {
+    const totalImages = images.length + (property?.images?.length || 0);
+    
+    if (totalImages < 3) {
       setImageValidationError("Adicione pelo menos 3 imagens");
       return;
     }
@@ -438,8 +441,13 @@ export function PropertyForm({ property, onSubmit, className }: PropertyFormProp
             </p>
           </div>
         </CardContent>
-        <CardFooter>
-          <Button type="submit" disabled={isSubmitting} className="w-full">
+        <CardFooter className="flex justify-between">
+          {onCancel && (
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancelar
+            </Button>
+          )}
+          <Button type="submit" disabled={isSubmitting} className={onCancel ? "" : "w-full"}>
             {isSubmitting ? "Salvando..." : property ? "Atualizar Imóvel" : "Cadastrar Imóvel"}
           </Button>
         </CardFooter>

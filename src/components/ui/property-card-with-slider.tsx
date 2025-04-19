@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -84,13 +83,13 @@ export function PropertyCardWithSlider({ property, className, isOwner = false, o
             
             <div className="absolute left-2 top-2 flex gap-2 z-10">
               {property.featured && (
-                <Badge className="bg-propulse-600 hover:bg-propulse-700">
+                <Badge variant="featured">
                   Destaque
                 </Badge>
               )}
               
               <Badge
-                variant={property.status === 'forSale' ? 'default' : 'secondary'}
+                variant={property.status === 'forSale' ? 'forSale' : 'forRent'}
               >
                 {property.status === 'forSale' ? 'Venda' : 
                 property.status === 'forRent' ? 'Aluguel' : 

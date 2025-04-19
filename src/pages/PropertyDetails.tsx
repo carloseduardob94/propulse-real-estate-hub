@@ -299,12 +299,12 @@ export default function PropertyDetails() {
               
               <div className="absolute top-4 left-4 flex gap-2">
                 {property.featured && (
-                  <Badge className="bg-propulse-600">
+                  <Badge variant="featured">
                     Destaque
                   </Badge>
                 )}
                 
-                <Badge variant={property.status === 'forSale' ? 'default' : 'secondary'}>
+                <Badge variant={property.status === 'forSale' ? 'forSale' : 'forRent'}>
                   {property.status === 'forSale' ? 'Venda' : 
                    property.status === 'forRent' ? 'Aluguel' : 
                    property.status === 'sold' ? 'Vendido' : 'Alugado'}

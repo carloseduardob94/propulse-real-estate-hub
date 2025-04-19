@@ -27,13 +27,17 @@ export function AvatarUpload({ user, url, onUploadComplete }: AvatarUploadProps)
 
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
-      const filePath = `${user?.id}-${Math.random()}.${fileExt}`;
+      // Generate a unique file path even without a user
+      const userId = user?.id || 'anonymous';
+      const filePath = `${userId}-${Math.random().toString().substring(2, 8)}.${fileExt}`;
 
+      // Check if the storage bucket exists, if not this will fail gracefully
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(filePath, file);
 
       if (uploadError) {
+        console.error("Upload error:", uploadError);
         throw uploadError;
       }
 
@@ -49,9 +53,10 @@ export function AvatarUpload({ user, url, onUploadComplete }: AvatarUploadProps)
         });
       }
     } catch (error: any) {
+      console.error("Avatar upload error:", error);
       toast({
         title: "Erro ao fazer upload",
-        description: error.message,
+        description: error.message || "Não foi possível fazer o upload da imagem.",
         variant: "destructive",
       });
     } finally {

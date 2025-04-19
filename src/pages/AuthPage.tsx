@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LoginForm } from "@/components/auth/login-form";
 import { RegisterForm } from "@/components/auth/register-form";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +13,22 @@ const AuthPage = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Check if the user is already logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) navigate('/dashboard');
+    });
+
+    // Set up auth listener
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) navigate('/dashboard');
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   const handleLogin = async (data: any) => {
     try {
@@ -28,11 +44,12 @@ const AuthPage = () => {
         description: "Redirecionando para o dashboard...",
       });
     } catch (error: any) {
+      console.error("Login error:", error);
       toast({
         title: "Erro no login",
         description: error.message === "Invalid login credentials" 
           ? "Email ou senha incorretos" 
-          : "Ocorreu um erro ao fazer login",
+          : "Ocorreu um erro ao fazer login: " + error.message,
         variant: "destructive",
       });
     }
@@ -61,9 +78,10 @@ const AuthPage = () => {
       
       setIsLogin(true);
     } catch (error: any) {
+      console.error("Registration error:", error);
       toast({
         title: "Erro no cadastro",
-        description: error.message,
+        description: error.message || "Ocorreu um erro ao fazer o cadastro.",
         variant: "destructive",
       });
     }

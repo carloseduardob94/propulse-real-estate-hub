@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -8,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   email: z.string().email({ message: "E-mail inválido" }),
@@ -40,19 +40,11 @@ export function LoginForm({ onSubmit, onRegisterClick, className }: LoginFormPro
     setIsSubmitting(true);
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: values.email,
-        password: values.password,
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Login realizado com sucesso!",
-        description: "Bem-vindo ao MeuCorretorPRO!",
-      });
-
+      if (onSubmit) {
+        await onSubmit(values);
+      }
     } catch (error: any) {
+      console.error("Form submission error:", error);
       toast({
         title: "Erro no Login",
         description: error.message === "Invalid login credentials"

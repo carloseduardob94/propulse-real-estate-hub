@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star } from "lucide-react";
@@ -66,7 +65,7 @@ export const HeroSection = ({ isAuthenticated, onLoginDemo }: HeroSectionProps) 
                 <img 
                   src="/lovable-uploads/7ece2f19-0cb5-498c-9b2a-6c04541f8182.png"
                   alt="Yzze, seu assistente virtual" 
-                  className="w-full h-auto object-contain rounded-lg transform hover:scale-105 transition-transform duration-300"
+                  className="w-full h-auto object-contain rounded-lg transform hover:scale-105 transition-transform duration-300 max-h-[300px]"
                 />
               </div>
               <div className="absolute -bottom-2 -left-2 bg-white/10 backdrop-blur-lg rounded-lg p-2 border border-white/20">
@@ -85,4 +84,3 @@ export const HeroSection = ({ isAuthenticated, onLoginDemo }: HeroSectionProps) 
     </section>
   );
 };
-

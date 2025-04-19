@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
@@ -14,7 +15,7 @@ import { useProperties } from "@/hooks/use-properties";
 import { PropertyFilterProvider, usePropertyFilters } from "@/components/property/property-filter-context";
 import { PropertyCatalogHeader } from "@/components/property/property-catalog-header";
 
-function PropertyContent({ properties, isLoading }: { properties: any[], isLoading: boolean }) {
+function PropertyContent({ properties, isLoading, showFilters }: { properties: any[], isLoading: boolean, showFilters: boolean }) {
   const [currentPage, setCurrentPage] = useState(1);
   const {
     filteredProperties,
@@ -42,21 +43,23 @@ function PropertyContent({ properties, isLoading }: { properties: any[], isLoadi
 
   return (
     <>
-      <PropertyFilters
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        propertyType={propertyType}
-        setPropertyType={setPropertyType}
-        bedrooms={bedrooms}
-        setBedrooms={setBedrooms}
-        bathrooms={bathrooms}
-        setBathrooms={setBathrooms}
-        priceRange={priceRange}
-        setPriceRange={setPriceRange}
-        status={status}
-        setStatus={setStatus}
-        onResetFilters={resetFilters}
-      />
+      {showFilters && (
+        <PropertyFilters
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          propertyType={propertyType}
+          setPropertyType={setPropertyType}
+          bedrooms={bedrooms}
+          setBedrooms={setBedrooms}
+          bathrooms={bathrooms}
+          setBathrooms={setBathrooms}
+          priceRange={priceRange}
+          setPriceRange={setPriceRange}
+          status={status}
+          setStatus={setStatus}
+          onResetFilters={resetFilters}
+        />
+      )}
       
       <PropertyGrid
         properties={filteredProperties}
@@ -221,8 +224,11 @@ export default function PropertyCatalog() {
       />
       
       <PropertyFilterProvider properties={properties}>
-        {showFilters && <PropertyContent properties={properties} isLoading={isLoading} />}
-        {!showFilters && <PropertyContent properties={properties} isLoading={isLoading} />}
+        <PropertyContent 
+          properties={properties} 
+          isLoading={isLoading} 
+          showFilters={showFilters} 
+        />
       </PropertyFilterProvider>
     </PageLayout>
   );

@@ -1,7 +1,7 @@
 
+import React from 'react';
 import { Property } from "@/types";
 import { PropertyCardWithSlider } from "@/components/ui/property-card-with-slider";
-import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReusablePagination } from "@/components/ui/reusable-pagination";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -51,8 +51,12 @@ export function PropertyGrid({
 
   if (properties.length === 0) {
     return (
-      <div className="text-center py-12">
-        <Info className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+      <div className="text-center py-12 flex flex-col items-center">
+        <img 
+          src="/lovable-uploads/1db02422-8cd7-4d1f-b4c6-813d5ca1afa5.png" 
+          alt="Nenhum imóvel encontrado" 
+          className="w-64 h-64 mb-6 opacity-80"
+        />
         <h2 className="text-xl font-semibold mb-2">Nenhum imóvel encontrado</h2>
         <p className="text-muted-foreground mb-6">Tente ajustar os filtros para ver mais resultados.</p>
         <Button onClick={onResetFilters}>Limpar filtros</Button>

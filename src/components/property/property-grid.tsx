@@ -51,7 +51,12 @@ export function PropertyGrid({
 
   if (properties.length === 0) {
     return (
-      <div className="text-center py-12">
+      <div className="text-center py-12 flex flex-col items-center">
+        <img 
+          src="/lovable-uploads/a9d30066-afd9-46c2-bf32-aa586d20e8c6.png" 
+          alt="Nenhum imóvel encontrado" 
+          className="w-48 h-48 mb-4"
+        />
         <Info className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
         <h2 className="text-xl font-semibold mb-2">Nenhum imóvel encontrado</h2>
         <p className="text-muted-foreground mb-6">Tente ajustar os filtros para ver mais resultados.</p>

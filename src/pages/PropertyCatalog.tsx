@@ -12,15 +12,71 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { useToast } from "@/hooks/use-toast";
 import { PropertyDialog } from "@/components/property/property-dialog";
 import { useProperties } from "@/hooks/use-properties";
-import { PropertyFilterProvider } from "@/components/property/property-filter-context";
+import { PropertyFilterProvider, usePropertyFilters } from "@/components/property/property-filter-context";
+import { PropertyCatalogHeader } from "@/components/property/property-catalog-header";
+
+// Create a component to use the filter context
+function PropertyContent({ properties, isLoading }: { properties: any[], isLoading: boolean }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const {
+    filteredProperties,
+    searchTerm,
+    setSearchTerm,
+    propertyType,
+    setPropertyType,
+    bedrooms,
+    setBedrooms,
+    bathrooms,
+    setBathrooms,
+    priceRange,
+    setPriceRange,
+    status,
+    setStatus,
+    resetFilters
+  } = usePropertyFilters();
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const itemsPerPage = 9;
+
+  return (
+    <>
+      <PropertyFilters
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        propertyType={propertyType}
+        setPropertyType={setPropertyType}
+        bedrooms={bedrooms}
+        setBedrooms={setBedrooms}
+        bathrooms={bathrooms}
+        setBathrooms={setBathrooms}
+        priceRange={priceRange}
+        setPriceRange={setPriceRange}
+        status={status}
+        setStatus={setStatus}
+        onResetFilters={resetFilters}
+      />
+      
+      <PropertyGrid
+        properties={filteredProperties}
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        onPageChange={handlePageChange}
+        onResetFilters={resetFilters}
+        isLoading={isLoading}
+      />
+    </>
+  );
+}
 
 export default function PropertyCatalog() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
-  const itemsPerPage = 9;
 
   const [user, setUser] = useState<UserProfile>({
     id: "",
@@ -114,16 +170,15 @@ export default function PropertyCatalog() {
     }
   };
 
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   const onPropertySubmit = async (data: any) => {
     const success = await addProperty(data);
     if (success) {
       setIsDialogOpen(false);
     }
+  };
+
+  const toggleFilters = () => {
+    setShowFilters(prev => !prev);
   };
 
   const actionButton = (
@@ -151,18 +206,15 @@ export default function PropertyCatalog() {
       description="Gerenciamento do seu portfólio de imóveis"
       actionButton={actionButton}
     >
+      <PropertyCatalogHeader 
+        showFilters={showFilters}
+        onToggleFilters={toggleFilters}
+        onShare={handleShareCatalog}
+      />
+      
       <PropertyFilterProvider properties={properties}>
-        {showFilters && (
-          <PropertyFilters />
-        )}
-        
-        <PropertyGrid
-          properties={properties}
-          currentPage={currentPage}
-          itemsPerPage={itemsPerPage}
-          onPageChange={handlePageChange}
-          isLoading={isLoading}
-        />
+        {showFilters && <PropertyContent properties={properties} isLoading={isLoading} />}
+        {!showFilters && <PropertyContent properties={properties} isLoading={isLoading} />}
       </PropertyFilterProvider>
     </PageLayout>
   );

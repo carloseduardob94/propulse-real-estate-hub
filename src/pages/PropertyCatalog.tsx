@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
@@ -213,8 +214,21 @@ export default function PropertyCatalog() {
       />
       
       <PropertyFilterProvider properties={properties}>
-        {showFilters && <PropertyContent properties={properties} isLoading={isLoading} />}
-        {!showFilters && <PropertyContent properties={properties} isLoading={isLoading} />}
+        <div className="container mx-auto px-4 py-6">
+          {showFilters && <PropertyContent properties={properties} isLoading={isLoading} />}
+          {!showFilters && (
+            <div className="mt-4">
+              <PropertyGrid
+                properties={properties}
+                currentPage={1}
+                itemsPerPage={9}
+                onPageChange={() => {}}
+                onResetFilters={() => {}}
+                isLoading={isLoading}
+              />
+            </div>
+          )}
+        </div>
       </PropertyFilterProvider>
     </PageLayout>
   );

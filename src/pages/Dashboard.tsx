@@ -16,10 +16,47 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Lead, Property } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 
+const transformPropertyFromDB = (property: any): Property => ({
+  id: property.id,
+  title: property.title,
+  description: property.description || "",
+  price: property.price,
+  address: property.address,
+  city: property.city,
+  state: property.state,
+  zipCode: property.zip_code || "",
+  bedrooms: property.bedrooms,
+  bathrooms: property.bathrooms,
+  area: property.area,
+  parkingSpaces: property.parking_spaces || 0,
+  type: property.type as 'apartment' | 'house' | 'commercial' | 'land',
+  status: property.status as 'forSale' | 'forRent' | 'sold' | 'rented',
+  images: property.images || [],
+  featured: property.featured || false,
+  createdAt: property.created_at,
+  updatedAt: property.updated_at,
+});
+
+const transformLeadFromDB = (lead: any): Lead => ({
+  id: lead.id,
+  name: lead.name,
+  email: lead.email,
+  phone: lead.phone || "",
+  message: lead.message || "",
+  budget: lead.budget || 0,
+  preferredLocation: lead.preferred_location || "",
+  propertyType: lead.property_type || [],
+  leadScore: lead.lead_score || 0,
+  status: lead.status as 'new' | 'contacted' | 'qualified' | 'unqualified' | 'converted',
+  createdAt: lead.created_at,
+  updatedAt: lead.updated_at,
+});
+
 const Dashboard = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [user, setUser] = useState({ 
+    id: "",
     name: "Usuário Demo", 
     email: "demo@example.com", 
     plan: "free" as const 
@@ -37,7 +74,7 @@ const Dashboard = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as Property[];
+      return data.map(transformPropertyFromDB) as Property[];
     }
   });
 
@@ -50,7 +87,7 @@ const Dashboard = () => {
         .order('lead_score', { ascending: false });
       
       if (error) throw error;
-      return data as Lead[];
+      return data.map(transformLeadFromDB) as Lead[];
     }
   });
 
@@ -72,6 +109,7 @@ const Dashboard = () => {
         
         if (userData) {
           setUser({
+            id: userData.id,
             name: userData.user_metadata?.name || "Usuário",
             email: userData.email || "sem email",
             plan: "free" as const
@@ -123,9 +161,22 @@ const Dashboard = () => {
 
   const onLeadSubmit = async (data: any) => {
     try {
+      const dbData = {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        message: data.notes,
+        budget: parseFloat(data.budget),
+        preferred_location: data.preferredLocation,
+        property_type: ["apartment"],
+        status: data.status,
+        lead_score: 0,
+        user_id: user.id
+      };
+
       const { error } = await supabase
         .from('leads')
-        .insert([{ ...data, user_id: user.id }]);
+        .insert([dbData]);
 
       if (error) throw error;
 
@@ -145,9 +196,27 @@ const Dashboard = () => {
 
   const onPropertySubmit = async (data: any) => {
     try {
+      const dbData = {
+        title: data.title,
+        description: data.description,
+        price: parseFloat(data.price),
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        zip_code: data.zipCode,
+        bedrooms: parseInt(data.bedrooms),
+        bathrooms: parseInt(data.bathrooms),
+        area: parseFloat(data.area),
+        parking_spaces: parseInt(data.parkingSpaces || 0),
+        type: data.type,
+        status: data.status,
+        images: data.images || [],
+        user_id: user.id
+      };
+
       const { error } = await supabase
         .from('properties')
-        .insert([{ ...data, user_id: user.id }]);
+        .insert([dbData]);
 
       if (error) throw error;
 
@@ -288,10 +357,17 @@ const Dashboard = () => {
                 recentProperties.map((property) => (
                   <div 
                     key={property.id}
-                    className="transition-transform duration-200 hover:scale-[1.02] cursor-pointer"
+                    className="transition-transform duration-200 hover:scale-[1.02] cursor-pointer group"
                     onClick={() => navigate(`/properties/${property.id}`)}
                   >
-                    <PropertyCard property={property} />
+                    <div className="relative">
+                      <PropertyCard property={property} />
+                      <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 rounded-lg transition-opacity flex items-center justify-center">
+                        <div className="bg-white/90 px-4 py-2 rounded-full text-sm font-medium">
+                          Ver detalhes
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ))
               ) : (
@@ -326,10 +402,17 @@ const Dashboard = () => {
                 topLeads.map((lead) => (
                   <div 
                     key={lead.id}
-                    className="transition-transform duration-200 hover:scale-[1.02] cursor-pointer"
+                    className="transition-transform duration-200 hover:scale-[1.02] cursor-pointer group"
                     onClick={() => navigate(`/leads/${lead.id}`)}
                   >
-                    <LeadCard lead={lead} />
+                    <div className="relative">
+                      <LeadCard lead={lead} />
+                      <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 rounded-lg transition-opacity flex items-center justify-center">
+                        <div className="bg-white/90 px-4 py-2 rounded-full text-sm font-medium">
+                          Ver detalhes
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ))
               ) : (

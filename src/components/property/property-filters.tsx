@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { Check, X } from "lucide-react";
 
 interface PropertyFiltersProps {
   searchTerm: string;
@@ -20,6 +20,7 @@ interface PropertyFiltersProps {
   status: string;
   setStatus: (value: string) => void;
   onResetFilters: () => void;
+  onApplyFilters: () => void;
 }
 
 export function PropertyFilters({
@@ -35,7 +36,8 @@ export function PropertyFilters({
   setPriceRange,
   status,
   setStatus,
-  onResetFilters
+  onResetFilters,
+  onApplyFilters
 }: PropertyFiltersProps) {
   return (
     <div className="border-b bg-white shadow-sm">
@@ -123,10 +125,14 @@ export function PropertyFilters({
           </div>
         </div>
         
-        <div className="flex justify-end mt-4">
-          <Button variant="outline" onClick={onResetFilters} className="mr-2">
+        <div className="flex justify-end mt-4 gap-2">
+          <Button variant="outline" onClick={onResetFilters}>
             <X className="mr-2 h-4 w-4" />
             Limpar filtros
+          </Button>
+          <Button variant="propulse" onClick={onApplyFilters}>
+            <Check className="mr-2 h-4 w-4" />
+            Aplicar filtros
           </Button>
         </div>
       </div>

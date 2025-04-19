@@ -4,6 +4,7 @@ import { Property } from "@/types";
 import { PropertyFilters } from "./property-filters";
 import { PropertyGrid } from "./property-grid";
 import { usePropertyFilters } from "./property-filter-context";
+import { useToast } from "@/hooks/use-toast";
 
 interface PropertyContentProps {
   properties: Property[];
@@ -13,6 +14,7 @@ interface PropertyContentProps {
 
 export function PropertyContent({ properties, isLoading, showFilters }: PropertyContentProps) {
   const [currentPage, setCurrentPage] = useState(1);
+  const { toast } = useToast();
   const {
     filteredProperties,
     searchTerm,
@@ -35,6 +37,14 @@ export function PropertyContent({ properties, isLoading, showFilters }: Property
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleApplyFilters = () => {
+    setCurrentPage(1);
+    toast({
+      title: "Filtros aplicados",
+      description: `${filteredProperties.length} imóveis encontrados`,
+    });
+  };
+
   const itemsPerPage = 9;
 
   return (
@@ -55,6 +65,7 @@ export function PropertyContent({ properties, isLoading, showFilters }: Property
             status={status}
             setStatus={setStatus}
             onResetFilters={resetFilters}
+            onApplyFilters={handleApplyFilters}
           />
         )}
       </div>

@@ -1,3 +1,4 @@
+
 import { Property } from "@/types";
 import { PropertyCardWithSlider } from "@/components/ui/property-card-with-slider";
 import { Info } from "lucide-react";
@@ -29,13 +30,12 @@ export function PropertyGrid({
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="rounded-lg overflow-hidden border border-gray-200 animate-pulse">
-          <Skeleton className="w-full h-48" />
-          <div className="p-4 space-y-2">
-            <Skeleton className="h-6 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-            <Skeleton className="h-4 w-2/3" />
+      <div className="flex justify-center items-center p-12">
+        <div className="w-full max-w-md">
+          <div className="space-y-3">
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-2/3" />
           </div>
         </div>
       </div>

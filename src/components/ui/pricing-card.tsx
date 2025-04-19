@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { PlanDetails } from "@/types";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface PricingCardProps {
@@ -20,16 +20,8 @@ export function PricingCard({ plan, isPopular, className }: PricingCardProps) {
       className
     )}>
       {plan.highlightedFeature && (
-        <div className={cn(
-          "absolute right-0 top-0",
-          plan.id === "yearly" ? "right-1/2 translate-x-1/2 -top-3 rotate-12" : "right-0 top-0"
-        )}>
-          <Badge className={cn(
-            "px-3 py-1",
-            plan.id === "yearly" 
-              ? "rounded-full bg-propulse-500 text-white shadow-lg transform transition-all duration-300 hover:scale-110 hover:rotate-0"
-              : "rounded-tl-none rounded-br-none rounded-tr-md rounded-bl-md bg-propulse-500 text-white"
-          )}>
+        <div className="absolute right-0 top-0">
+          <Badge className="rounded-tl-none rounded-br-none rounded-tr-md rounded-bl-md bg-propulse-500 px-3 py-1 text-white">
             {plan.highlightedFeature}
           </Badge>
         </div>

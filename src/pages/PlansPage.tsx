@@ -1,9 +1,106 @@
+
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
-import { PricingPlans } from "@/components/ui/pricing-plans";
+import { PricingCard } from "@/components/ui/pricing-card";
+import { PlanDetails } from "@/types";
+import { supabase } from "@/integrations/supabase/client";
 import { UserProfile } from "@/types/auth";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+
+const plans: PlanDetails[] = [
+  {
+    id: "free",
+    name: "Gratuito",
+    price: 0,
+    period: "free",
+    features: [
+      {
+        id: "free-1",
+        title: "Até 3 imóveis",
+        description: "Ideal para começar",
+        includedIn: ["free", "monthly", "yearly"]
+      },
+      {
+        id: "free-2",
+        title: "Gestão de Leads",
+        description: "Cadastre e gerencie seus contatos",
+        includedIn: ["free", "monthly", "yearly"]
+      },
+      {
+        id: "free-3",
+        title: "Propostas Básicas",
+        description: "Crie propostas simples em PDF",
+        includedIn: ["free", "monthly", "yearly"]
+      }
+    ],
+    maxProperties: 3,
+    maxProposals: 10,
+    supportsLeadScoring: false,
+    supportsPdfExport: true
+  },
+  {
+    id: "monthly",
+    name: "Profissional",
+    price: 97,
+    period: "monthly",
+    features: [
+      {
+        id: "pro-1",
+        title: "Imóveis Ilimitados",
+        description: "Cadastre todos seus imóveis",
+        includedIn: ["monthly", "yearly"]
+      },
+      {
+        id: "pro-2",
+        title: "Lead Scoring Automático",
+        description: "Qualificação automática de leads",
+        includedIn: ["monthly", "yearly"]
+      },
+      {
+        id: "pro-3",
+        title: "Propostas Personalizadas",
+        description: "Templates personalizados e marca própria",
+        includedIn: ["monthly", "yearly"]
+      },
+      {
+        id: "pro-4",
+        title: "Automações via n8n",
+        description: "Integre com outras ferramentas",
+        includedIn: ["monthly", "yearly"]
+      }
+    ],
+    highlightedFeature: "Mais Popular",
+    maxProperties: -1,
+    maxProposals: -1,
+    supportsLeadScoring: true,
+    supportsPdfExport: true
+  },
+  {
+    id: "yearly",
+    name: "Profissional Anual",
+    price: 970,
+    period: "yearly",
+    features: [
+      {
+        id: "yearly-1",
+        title: "Todos os recursos Pro",
+        description: "Acesso completo à plataforma",
+        includedIn: ["yearly"]
+      },
+      {
+        id: "yearly-2",
+        title: "2 Meses Grátis",
+        description: "Economize pagando anualmente",
+        includedIn: ["yearly"]
+      }
+    ],
+    highlightedFeature: "Melhor Custo-Benefício",
+    maxProperties: -1,
+    maxProposals: -1,
+    supportsLeadScoring: true,
+    supportsPdfExport: true
+  }
+];
 
 export default function PlansPage() {
   const navigate = useNavigate();
@@ -82,7 +179,15 @@ export default function PlansPage() {
           </div>
           
           <div className="mx-auto max-w-7xl">
-            <PricingPlans />
+            <div className="grid gap-8 lg:grid-cols-3">
+              {plans.map((plan) => (
+                <PricingCard
+                  key={plan.id}
+                  plan={plan}
+                  isPopular={plan.id === "monthly"}
+                />
+              ))}
+            </div>
           </div>
           
           <div className="mt-12 text-center">

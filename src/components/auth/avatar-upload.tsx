@@ -27,20 +27,35 @@ export function AvatarUpload({ user, url, onUploadComplete }: AvatarUploadProps)
 
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
-      // Generate a unique file path even without a user
+      // Generate a unique file path using timestamp to avoid collisions
       const userId = user?.id || 'anonymous';
-      const filePath = `${userId}-${Math.random().toString().substring(2, 8)}.${fileExt}`;
+      const timestamp = new Date().getTime();
+      const filePath = `${userId}-${timestamp}.${fileExt}`;
 
-      // Check if the storage bucket exists, if not this will fail gracefully
+      // Make sure storage bucket exists
+      const { data: bucketData } = await supabase.storage.getBucket('avatars');
+      if (!bucketData) {
+        console.log("Creating avatars bucket...");
+        await supabase.storage.createBucket('avatars', {
+          public: true,
+          fileSizeLimit: 1024 * 1024 * 2 // 2MB
+        });
+      }
+
+      // Upload the file
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          upsert: true,
+          cacheControl: '3600'
+        });
 
       if (uploadError) {
         console.error("Upload error:", uploadError);
         throw uploadError;
       }
 
+      // Get the public URL
       const { data } = await supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { PropertyCard } from "@/components/ui/property-card";
@@ -29,14 +30,31 @@ const Dashboard = () => {
     .slice(0, 3);
   
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!data.session) {
-        navigate('/login');
+    const getUserProfile = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          // Don't navigate here, that's handled by the router in App.tsx
+          return;
+        }
+        
+        // Update user info from session
+        const userData = session.user;
+        
+        if (userData) {
+          setUser({
+            name: userData.user_metadata?.name || "Usuário",
+            email: userData.email || "sem email",
+            plan: "free" as const
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
       }
     };
     
-    checkAuth();
+    getUserProfile();
   }, [navigate]);
   
   const handleLogout = async () => {
@@ -49,7 +67,7 @@ const Dashboard = () => {
         description: "Você foi desconectado da sua conta.",
       });
       
-      navigate('/login');
+      // Navigate will happen automatically due to auth state change
     } catch (error: any) {
       console.error("Logout error:", error);
       toast({

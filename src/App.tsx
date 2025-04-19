@@ -24,27 +24,41 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setIsLoading(false);
-    });
+    // Configure the Supabase client to properly persist sessions
+    const initializeAuth = async () => {
+      try {
+        // Set up the auth state change listener first
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, newSession) => {
+          console.log("Auth state changed:", _event, !!newSession);
+          setSession(newSession);
+        });
 
-    // Listen for auth changes and update session
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+        // Then get the initial session
+        const { data } = await supabase.auth.getSession();
+        console.log("Initial session:", !!data.session);
+        setSession(data.session);
+        
+        if (data.session) {
+          // Ensure session is persisted
+          await supabase.auth.setSession({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token,
+          });
+        }
+        
+        setIsLoading(false);
+        
+        return () => subscription?.unsubscribe();
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+        setIsLoading(false);
+      }
+    };
 
-    // Configure session persistence for 7 days
-    if (session) {
-      // Set longer expiration using cookies
-      supabase.auth.refreshSession({ refresh_token: session.refresh_token });
-    }
-
-    return () => subscription.unsubscribe();
-  }, [session]);
+    initializeAuth();
+  }, []);
 
   if (isLoading) {
     // You could add a loading spinner here if desired

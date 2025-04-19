@@ -292,7 +292,7 @@ const Dashboard = () => {
       
       <footer className="py-6 bg-white border-t">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} PropulseHub. Todos os direitos reservados.</p>
+          <p>&copy; {new Date().getFullYear()} MeuCorretorPRO. Todos os direitos reservados.</p>
         </div>
       </footer>
     </div>

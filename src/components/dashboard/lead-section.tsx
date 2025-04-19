@@ -33,7 +33,7 @@ export function LeadSection({ leads, isLoading, onNewLead }: LeadSectionProps) {
         </p>
         <Button 
           onClick={onNewLead}
-          className="bg-propulse-600 hover:bg-propulse-700 text-white"
+          variant="propulse"
         >
           <Plus className="h-4 w-4 mr-2" />
           Adicionar Lead

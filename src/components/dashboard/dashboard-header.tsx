@@ -24,15 +24,14 @@ export function DashboardHeader({ user, onNewProperty, onNewLead }: DashboardHea
       <div className="flex gap-3 mt-4 md:mt-0">
         <Button 
           onClick={onNewProperty}
-          className="bg-propulse-600 hover:bg-propulse-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+          variant="propulse"
         >
           <Plus className="h-4 w-4 mr-2" />
           Novo Imóvel
         </Button>
         <Button 
-          variant="outline"
+          variant="propulse-outline"
           onClick={onNewLead}
-          className="border-propulse-600 text-propulse-600 hover:bg-propulse-50 shadow-lg hover:shadow-xl transition-all duration-200"
         >
           <Plus className="h-4 w-4 mr-2" />
           Novo Lead

@@ -420,7 +420,7 @@ export default function PropertyDetails() {
       </footer>
       
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="w-full max-w-md">
+        <DialogContent className="w-full max-w-[800px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar Imóvel</DialogTitle>
             <DialogDescription>

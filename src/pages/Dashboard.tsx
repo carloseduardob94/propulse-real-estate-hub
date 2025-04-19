@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Property, Lead } from "@/types";
+import { UserProfile } from "@/types/auth";
 import { PropertyForm } from "@/components/ui/property-form";
 import { LeadForm } from "@/components/ui/lead-form";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
@@ -132,6 +133,8 @@ const Dashboard = () => {
         title: "Logout realizado com sucesso!",
         description: "Você foi desconectado da sua conta.",
       });
+      
+      navigate('/login');
     } catch (error: any) {
       console.error("Logout error:", error);
       toast({

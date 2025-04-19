@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { LeadForm } from "@/components/ui/lead-form";
@@ -12,11 +11,13 @@ import { Footer } from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { UserProfile } from "@/types/auth";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<UserProfile | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const checkSession = async () => {
@@ -101,9 +102,25 @@ const Index = () => {
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setIsAuthenticated(false);
-    setUser(null);
+    try {
+      await supabase.auth.signOut();
+      setIsAuthenticated(false);
+      setUser(null);
+      
+      toast({
+        title: "Logout realizado com sucesso!",
+        description: "Você foi desconectado da sua conta.",
+      });
+      
+      navigate('/login');
+    } catch (error: any) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Erro ao fazer logout",
+        description: error.message || "Ocorreu um erro ao desconectar.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleLoginDemo = () => {

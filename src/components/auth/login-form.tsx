@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -43,9 +44,6 @@ export function LoginForm({ onSubmit, onRegisterClick, className }: LoginFormPro
       const { error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
-        options: {
-          persistSession: true // Enable session persistence
-        }
       });
 
       if (error) throw error;
@@ -106,7 +104,7 @@ export function LoginForm({ onSubmit, onRegisterClick, className }: LoginFormPro
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="��•••••••"
+                placeholder="••••••••"
                 {...form.register("password")}
               />
               <Button

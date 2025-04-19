@@ -38,11 +38,9 @@ const App = () => {
 
     // Configure session persistence for 7 days
     if (session) {
-      supabase.auth.setSession({
-        access_token: session.access_token,
-        refresh_token: session.refresh_token,
-      }, {
-        expiresIn: 604800 // 7 days in seconds
+      // Set longer expiration using cookies
+      supabase.auth.refreshSession({
+        refreshToken: session.refresh_token,
       });
     }
 

@@ -1,7 +1,11 @@
 
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { PricingCard } from "@/components/ui/pricing-card";
 import { PlanDetails } from "@/types";
+import { supabase } from "@/integrations/supabase/client";
+import { UserProfile } from "@/types/auth";
+import { useNavigate } from "react-router-dom";
 
 const plans: PlanDetails[] = [
   {
@@ -99,9 +103,69 @@ const plans: PlanDetails[] = [
 ];
 
 export default function PlansPage() {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<UserProfile>({ 
+    id: "",
+    name: "", 
+    email: "", 
+    plan: "free",
+    avatar_url: null,
+    company_name: null
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const getUserProfile = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          const userData = session.user;
+          setIsAuthenticated(true);
+          
+          if (userData) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', userData.id)
+              .single();
+              
+            setUser({
+              id: userData.id,
+              name: profile?.name || userData.user_metadata?.name || "Usuário",
+              email: userData.email || "sem email",
+              plan: (profile?.plan as "free" | "monthly" | "yearly") || "free",
+              avatar_url: profile?.avatar_url || null,
+              company_name: profile?.company_name || null
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+    
+    getUserProfile();
+  }, []);
+  
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      navigate('/login');
+    } catch (error: any) {
+      console.error("Logout error:", error);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar />
+      <Navbar 
+        isAuthenticated={isAuthenticated} 
+        user={user}
+        onLogout={handleLogout}
+      />
       
       <main className="flex-1">
         <div className="py-12 px-4 sm:px-6 lg:px-8">

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { useToast } from "@/hooks/use-toast";
@@ -59,12 +60,13 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<UserProfile>({ 
     id: "",
-    name: "Usuário Demo", 
-    email: "demo@example.com", 
+    name: "", 
+    email: "", 
     plan: "free",
     avatar_url: null,
     company_name: null
   });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   const [showPropertyForm, setShowPropertyForm] = useState(false);
   const [showLeadForm, setShowLeadForm] = useState(false);
@@ -101,10 +103,12 @@ const Dashboard = () => {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
+          navigate('/login');
           return;
         }
         
         const userData = session.user;
+        setIsAuthenticated(true);
         
         if (userData) {
           const { data: profile } = await supabase
@@ -229,7 +233,7 @@ const Dashboard = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar 
-        isAuthenticated={true} 
+        isAuthenticated={isAuthenticated} 
         user={user} 
         onLogout={handleLogout} 
       />

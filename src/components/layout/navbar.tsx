@@ -1,9 +1,8 @@
-
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X, Home, Users, FileText, BadgeDollarSign, LogOut, UserCog } from "lucide-react";
+import { Menu, X, Home, Building, Users, FileText, BadgeDollarSign, LogOut, UserCog } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Logo } from "@/components/brand/logo";
@@ -21,6 +20,7 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isMobile = useIsMobile();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const closeMenu = () => {
     setIsMenuOpen(false);
@@ -45,7 +45,6 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
     closeMenu();
   };
 
-  // Generate avatar fallback from name
   const getUserInitials = (name: string | null) => {
     if (!name) return '?';
     
@@ -80,9 +79,14 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
     }
   };
 
+  const isActive = (path: string) => {
+    return location.pathname === path || 
+           (path !== '/' && location.pathname.startsWith(path));
+  };
+
   const navLinks = [
     { href: "/", label: "Início", icon: Home },
-    { href: "/properties", label: "Imóveis", icon: Home },
+    { href: "/properties", label: "Imóveis", icon: Building },
     { href: "/leads", label: "Leads", icon: Users },
     { href: "/proposals", label: "Propostas", icon: FileText },
     { href: "/plans", label: "Planos", icon: BadgeDollarSign },
@@ -107,7 +111,6 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
             </Button>
           </div>
 
-          
           <div className="flex-1 my-4">
             <nav className="flex flex-col space-y-1">
               {navLinks.map((link) => (
@@ -175,15 +178,23 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
 
   const renderDesktopMenu = () => (
     <div className="hidden md:flex items-center gap-6">
-      {navLinks.map((link) => (
-        <Link
-          key={link.href}
-          to={link.href}
-          className="text-sm font-medium hover:text-propulse-600 transition-colors"
-        >
-          {link.label}
-        </Link>
-      ))}
+      {navLinks.map((link) => {
+        const active = isActive(link.href);
+        return (
+          <Link
+            key={link.href}
+            to={link.href}
+            className={`flex items-center gap-2 text-sm font-medium transition-colors px-3 py-2 rounded-md ${
+              active 
+                ? "text-propulse-600 bg-propulse-50"
+                : "text-gray-600 hover:text-propulse-600 hover:bg-gray-50"
+            }`}
+          >
+            <link.icon className={`h-4 w-4 ${active ? "text-propulse-600" : "text-gray-500"}`} />
+            {link.label}
+          </Link>
+        );
+      })}
     </div>
   );
 

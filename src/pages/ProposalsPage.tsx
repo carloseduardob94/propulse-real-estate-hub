@@ -1,10 +1,13 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Plus, User, CalendarIcon, ArrowUpRight, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { UserProfile } from "@/types/auth";
+import { useNavigate } from "react-router-dom";
 
 // Mock proposals data
 const MOCK_PROPOSALS = [
@@ -45,6 +48,63 @@ const MOCK_PROPOSALS = [
 export default function ProposalsPage() {
   const [proposals, setProposals] = useState(MOCK_PROPOSALS);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const navigate = useNavigate();
+  const [user, setUser] = useState<UserProfile>({ 
+    id: "",
+    name: "", 
+    email: "", 
+    plan: "free",
+    avatar_url: null,
+    company_name: null
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
+  useEffect(() => {
+    const getUserProfile = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          const userData = session.user;
+          setIsAuthenticated(true);
+          
+          if (userData) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', userData.id)
+              .single();
+              
+            setUser({
+              id: userData.id,
+              name: profile?.name || userData.user_metadata?.name || "Usuário",
+              email: userData.email || "sem email",
+              plan: (profile?.plan as "free" | "monthly" | "yearly") || "free",
+              avatar_url: profile?.avatar_url || null,
+              company_name: profile?.company_name || null
+            });
+          }
+        } else {
+          navigate('/login');
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+    
+    getUserProfile();
+  }, [navigate]);
+  
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      navigate('/login');
+    } catch (error: any) {
+      console.error("Logout error:", error);
+    }
+  };
   
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
@@ -95,15 +155,9 @@ export default function ProposalsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar 
-        isAuthenticated={true} 
-        user={{ 
-          id: "demo-id",
-          name: "Usuário Demo", 
-          email: "demo@example.com", 
-          plan: "free",
-          avatar_url: null,
-          company_name: null
-        }} 
+        isAuthenticated={isAuthenticated} 
+        user={user}
+        onLogout={handleLogout}
       />
       
       <main className="flex-1 container mx-auto px-4 py-8">
@@ -198,4 +252,3 @@ export default function ProposalsPage() {
     </div>
   );
 }
-

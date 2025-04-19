@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { PricingCard } from "@/components/ui/pricing-card";
-import { PRICING_PLANS } from "@/data/mock-data";
+import { PricingPlans } from "@/components/ui/pricing-plans";
 
 export const PricingSection = () => {
   return (
@@ -14,11 +13,7 @@ export const PricingSection = () => {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <PricingCard plan={PRICING_PLANS[0]} />
-          <PricingCard plan={PRICING_PLANS[1]} isPopular />
-          <PricingCard plan={PRICING_PLANS[2]} />
-        </div>
+        <PricingPlans />
       </div>
     </section>
   );

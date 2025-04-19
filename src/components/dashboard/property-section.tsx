@@ -2,7 +2,7 @@
 import { Property } from "@/types";
 import { PropertyCard } from "@/components/ui/property-card";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Inbox } from "lucide-react";
+import { ChevronRight, Inbox, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface PropertySectionProps {

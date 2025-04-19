@@ -1,9 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { PropertyCard } from "@/components/ui/property-card";
 import { LeadCard } from "@/components/ui/lead-card";
 import { Button } from "@/components/ui/button";
+import { PropertyForm } from "@/components/ui/property-form";
+import { LeadForm } from "@/components/ui/lead-form";
 import { MOCK_PROPERTIES, MOCK_LEADS } from "@/data/mock-data";
 import { Plus, Home, Users, FileText, Settings, ChevronRight, Check } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 
 const Dashboard = () => {
   const { toast } = useToast();
@@ -29,6 +32,9 @@ const Dashboard = () => {
     .sort((a, b) => b.leadScore - a.leadScore)
     .slice(0, 3);
   
+  const [showPropertyForm, setShowPropertyForm] = useState(false);
+  const [showLeadForm, setShowLeadForm] = useState(false);
+
   useEffect(() => {
     const getUserProfile = async () => {
       try {
@@ -78,6 +84,22 @@ const Dashboard = () => {
     }
   };
 
+  const onLeadSubmit = (data: any) => {
+    toast({
+      title: "Lead cadastrado com sucesso!",
+      description: "O lead foi adicionado à sua lista.",
+    });
+    setShowLeadForm(false);
+  };
+
+  const onPropertySubmit = (data: any) => {
+    toast({
+      title: "Imóvel cadastrado com sucesso!",
+      description: "O imóvel foi adicionado ao seu catálogo.",
+    });
+    setShowPropertyForm(false);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar 
@@ -95,17 +117,20 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex gap-3 mt-4 md:mt-0">
-            <Button asChild>
-              <a href="/properties/new">
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Imóvel
-              </a>
+            <Button 
+              onClick={() => setShowPropertyForm(true)}
+              className="bg-propulse-600 hover:bg-propulse-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Novo Imóvel
             </Button>
-            <Button variant="outline" asChild>
-              <a href="/leads/new">
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Lead
-              </a>
+            <Button 
+              variant="outline"
+              onClick={() => setShowLeadForm(true)}
+              className="border-propulse-600 text-propulse-600 hover:bg-propulse-50 shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Novo Lead
             </Button>
           </div>
         </div>
@@ -317,6 +342,34 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         )}
+
+        <Sheet open={showPropertyForm} onOpenChange={setShowPropertyForm}>
+          <SheetContent className="w-full sm:max-w-[800px] overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>Cadastrar Novo Imóvel</SheetTitle>
+              <SheetDescription>
+                Preencha os dados do imóvel para cadastrá-lo em seu portfólio.
+              </SheetDescription>
+            </SheetHeader>
+            <div className="mt-6">
+              <PropertyForm onSubmit={onPropertySubmit} />
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        <Drawer open={showLeadForm} onOpenChange={setShowLeadForm}>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>Cadastrar Novo Lead</DrawerTitle>
+              <DrawerDescription>
+                Adicione as informações do novo lead.
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="p-4">
+              <LeadForm onSubmit={onLeadSubmit} />
+            </div>
+          </DrawerContent>
+        </Drawer>
       </main>
       
       <footer className="py-6 bg-white border-t">

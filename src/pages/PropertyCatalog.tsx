@@ -10,6 +10,14 @@ import { useToast } from "@/hooks/use-toast";
 import { Share2, Info, Filter, X } from "lucide-react";
 import { MOCK_PROPERTIES } from "@/data/mock-data";
 import { Property } from "@/types";
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from "@/components/ui/pagination";
 
 export default function PropertyCatalog() {
   const { toast } = useToast();

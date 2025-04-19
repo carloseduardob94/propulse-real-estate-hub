@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -48,15 +47,14 @@ export function LoginForm({ onSubmit, onRegisterClick, className }: LoginFormPro
 
       if (error) throw error;
 
-      // Successful login
       toast({
         title: "Login realizado com sucesso!",
-        description: "Bem-vindo de volta!",
+        description: "Bem-vindo ao MeuCorretorPRO!",
       });
 
     } catch (error: any) {
       toast({
-        title: "Erro",
+        title: "Erro no Login",
         description: error.message === "Invalid login credentials"
           ? "Email ou senha incorretos"
           : "Ocorreu um erro ao fazer login. Tente novamente.",
@@ -70,7 +68,7 @@ export function LoginForm({ onSubmit, onRegisterClick, className }: LoginFormPro
   return (
     <Card className={className}>
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">Login</CardTitle>
+        <CardTitle className="text-2xl font-bold">Login no MeuCorretorPRO</CardTitle>
         <CardDescription>
           Entre com seu e-mail e senha para acessar sua conta
         </CardDescription>

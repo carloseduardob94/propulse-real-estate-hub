@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -58,7 +57,7 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between py-4">
             <Link to="/" className="flex items-center gap-2" onClick={closeMenu}>
-              <span className="font-bold text-xl text-propulse-800">PropulseHub</span>
+              <span className="font-bold text-xl text-propulse-800">MeuCorretorPRO</span>
             </Link>
             <Button variant="ghost" size="icon" onClick={closeMenu}>
               <X className="h-5 w-5" />
@@ -175,7 +174,7 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2">
-            <span className="font-bold text-xl text-propulse-800">PropulseHub</span>
+            <span className="font-bold text-xl text-propulse-800">MeuCorretorPRO</span>
           </Link>
           {renderDesktopMenu()}
         </div>

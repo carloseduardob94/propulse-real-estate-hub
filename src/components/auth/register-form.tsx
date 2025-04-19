@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -50,16 +49,13 @@ export function RegisterForm({ onSubmit, onLoginClick, className }: RegisterForm
     setIsSubmitting(true);
     
     try {
-      // Simulated delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
       if (onSubmit) {
-        onSubmit(values);
+        await onSubmit(values);
       }
     } catch (error) {
       toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao cadastrar. Tente novamente.",
+        title: "Erro no Cadastro",
+        description: "Não foi possível realizar o cadastro. Por favor, tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -70,9 +66,9 @@ export function RegisterForm({ onSubmit, onLoginClick, className }: RegisterForm
   return (
     <Card className={className}>
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">Cadastro</CardTitle>
+        <CardTitle className="text-2xl font-bold">Cadastro no MeuCorretorPRO</CardTitle>
         <CardDescription>
-          Crie sua conta para começar a usar o PropulseHub
+          Crie sua conta para começar a usar o MeuCorretorPRO
         </CardDescription>
       </CardHeader>
       <form onSubmit={form.handleSubmit(handleSubmit)}>
@@ -168,7 +164,11 @@ export function RegisterForm({ onSubmit, onLoginClick, className }: RegisterForm
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <Button type="submit" disabled={isSubmitting} className="w-full">
+          <Button 
+            type="submit" 
+            disabled={isSubmitting} 
+            className="w-full"
+          >
             {isSubmitting ? "Cadastrando..." : "Cadastrar"}
           </Button>
           <div className="text-center text-sm">

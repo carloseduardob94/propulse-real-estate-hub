@@ -59,14 +59,14 @@ export const HeroSection = ({ isAuthenticated, onLoginDemo }: HeroSectionProps) 
               </Button>
             </div>
           </div>
-          <div className="relative hidden md:block">
-            <div className="absolute -right-8 w-full max-w-xl">
+          <div className="relative md:flex items-center justify-center">
+            <div className="relative w-full max-w-md mx-auto">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-tr from-propulse-900/30 to-transparent rounded-lg" />
                 <img 
-                  src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&auto=format&fit=crop&q=80" 
+                  src="/lovable-uploads/7ece2f19-0cb5-498c-9b2a-6c04541f8182.png"
                   alt="Yzze, seu assistente virtual" 
-                  className="w-full h-auto rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-300"
+                  className="w-full h-auto object-contain rounded-lg transform hover:scale-105 transition-transform duration-300"
                 />
               </div>
               <div className="absolute -bottom-4 -left-4 bg-white/10 backdrop-blur-lg rounded-lg p-4 border border-white/20">

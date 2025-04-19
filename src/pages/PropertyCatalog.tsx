@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Share2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { UserProfile } from "@/types/auth";
@@ -15,7 +14,6 @@ import { useProperties } from "@/hooks/use-properties";
 import { PropertyFilterProvider, usePropertyFilters } from "@/components/property/property-filter-context";
 import { PropertyCatalogHeader } from "@/components/property/property-catalog-header";
 
-// Create a component to use the filter context
 function PropertyContent({ properties, isLoading }: { properties: any[], isLoading: boolean }) {
   const [currentPage, setCurrentPage] = useState(1);
   const {
@@ -197,6 +195,16 @@ export default function PropertyCatalog() {
     </Dialog>
   );
 
+  const getUserSlug = (profile: UserProfile) => {
+    const baseSlug = profile.company_name || profile.name || profile.id;
+    return baseSlug.toLowerCase()
+      .replace(/\s+/g, '-')           // Replace spaces with -
+      .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+      .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+      .replace(/^-+/, '')             // Trim - from start of text
+      .replace(/-+$/, '');            // Trim - from end of text
+  };
+
   return (
     <PageLayout
       isAuthenticated={isAuthenticated}
@@ -209,7 +217,7 @@ export default function PropertyCatalog() {
       <PropertyCatalogHeader 
         showFilters={showFilters}
         onToggleFilters={toggleFilters}
-        onShare={handleShareCatalog}
+        userSlug={getUserSlug(user)}
       />
       
       <PropertyFilterProvider properties={properties}>

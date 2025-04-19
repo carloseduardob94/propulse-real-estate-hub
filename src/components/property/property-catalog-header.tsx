@@ -1,17 +1,18 @@
 
 import { Button } from "@/components/ui/button";
-import { Share2, Filter, X } from "lucide-react";
+import { Filter, X } from "lucide-react";
+import { ShareCatalogButton } from "./share-catalog-button";
 
 interface PropertyCatalogHeaderProps {
   showFilters: boolean;
   onToggleFilters: () => void;
-  onShare: () => void;
+  userSlug: string;
 }
 
 export function PropertyCatalogHeader({
   showFilters,
   onToggleFilters,
-  onShare
+  userSlug
 }: PropertyCatalogHeaderProps) {
   return (
     <div className="bg-propulse-700 text-white py-6">
@@ -23,14 +24,7 @@ export function PropertyCatalogHeader({
           </div>
           
           <div className="flex items-center gap-3">
-            <Button 
-              variant="outline" 
-              className="bg-white/10 text-white border-white/20 hover:bg-white/20 hover:text-white"
-              onClick={onShare}
-            >
-              <Share2 className="mr-2 h-4 w-4" />
-              Compartilhar
-            </Button>
+            <ShareCatalogButton userSlug={userSlug} />
             
             <Button 
               variant={showFilters ? "secondary" : "outline"}

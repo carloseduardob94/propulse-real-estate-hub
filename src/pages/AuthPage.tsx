@@ -1,16 +1,20 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { AuthLayout } from "@/components/auth/auth-layout";
 import { LoginForm } from "@/components/auth/login-form";
 import { RegisterForm } from "@/components/auth/register-form";
+import { useToast } from "@/hooks/use-toast";
+import { Logo } from "@/components/brand/logo";
+import { AvatarUpload } from "@/components/auth/avatar-upload";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
-export default function AuthPage() {
+const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleLogin = async (data: { email: string; password: string }) => {
+  const handleLogin = async (data: any) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email: data.email,
@@ -19,14 +23,22 @@ export default function AuthPage() {
 
       if (error) throw error;
 
-      navigate("/dashboard");
+      toast({
+        title: "Login realizado com sucesso!",
+        description: "Redirecionando para o dashboard...",
+      });
     } catch (error: any) {
-      console.error("Error signing in:", error.message);
-      throw error;
+      toast({
+        title: "Erro no login",
+        description: error.message === "Invalid login credentials" 
+          ? "Email ou senha incorretos" 
+          : "Ocorreu um erro ao fazer login",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleRegister = async (data: { email: string; password: string; name: string }) => {
+  const handleRegister = async (data: any) => {
     try {
       const { error } = await supabase.auth.signUp({
         email: data.email,
@@ -34,40 +46,77 @@ export default function AuthPage() {
         options: {
           data: {
             name: data.name,
+            avatar_url: avatarUrl,
+            company_name: data.companyName || null,
           },
         },
       });
 
       if (error) throw error;
 
-      // Switch to login view after successful registration
+      toast({
+        title: "Cadastro realizado com sucesso!",
+        description: "Você já pode fazer login com suas credenciais.",
+      });
+      
       setIsLogin(true);
     } catch (error: any) {
-      console.error("Error signing up:", error.message);
-      throw error;
+      toast({
+        title: "Erro no cadastro",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
   return (
-    <AuthLayout
-      title={isLogin ? "Entrar" : "Criar conta"}
-      description={
-        isLogin
-          ? "Entre com seu e-mail e senha"
-          : "Crie sua conta gratuita"
-      }
-    >
-      {isLogin ? (
-        <LoginForm
-          onSubmit={handleLogin}
-          onRegisterClick={() => setIsLogin(false)}
-        />
-      ) : (
-        <RegisterForm
-          onSubmit={handleRegister}
-          onLoginClick={() => setIsLogin(true)}
-        />
-      )}
-    </AuthLayout>
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-propulse-50 via-white to-propulse-50">
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="bg-white/80 backdrop-blur-lg w-full max-w-lg p-8 rounded-2xl shadow-xl space-y-8">
+          <div className="text-center space-y-2">
+            <Logo className="mx-auto" />
+            <h1 className="text-2xl font-bold text-gray-900">
+              {isLogin ? "Bem-vindo de volta!" : "Criar nova conta"}
+            </h1>
+            <p className="text-gray-600">
+              {isLogin 
+                ? "Entre com suas credenciais para acessar sua conta" 
+                : "Preencha os dados abaixo para criar sua conta"}
+            </p>
+          </div>
+
+          {isLogin ? (
+            <LoginForm 
+              onSubmit={handleLogin} 
+              onRegisterClick={() => setIsLogin(false)} 
+            />
+          ) : (
+            <div className="space-y-6">
+              <AvatarUpload 
+                user={null}
+                url={avatarUrl}
+                onUploadComplete={(url) => {
+                  setAvatarUrl(url);
+                  toast({
+                    title: "Avatar carregado com sucesso!",
+                    description: "Sua foto foi atualizada.",
+                  });
+                }}
+              />
+              <RegisterForm 
+                onSubmit={handleRegister} 
+                onLoginClick={() => setIsLogin(true)} 
+              />
+            </div>
+          )}
+        </div>
+      </div>
+      
+      <footer className="py-6 text-center text-sm text-gray-600">
+        &copy; {new Date().getFullYear()} MeuCorretorPRO. Todos os direitos reservados.
+      </footer>
+    </div>
   );
-}
+};
+
+export default AuthPage;

@@ -39,23 +39,25 @@ export function PropertyContent({ properties, isLoading, showFilters }: Property
 
   return (
     <>
-      {showFilters && (
-        <PropertyFilters
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          propertyType={propertyType}
-          setPropertyType={setPropertyType}
-          bedrooms={bedrooms}
-          setBedrooms={setBedrooms}
-          bathrooms={bathrooms}
-          setBathrooms={setBathrooms}
-          priceRange={priceRange}
-          setPriceRange={setPriceRange}
-          status={status}
-          setStatus={setStatus}
-          onResetFilters={resetFilters}
-        />
-      )}
+      <div className={`transition-all duration-500 ease-out transform ${showFilters ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 h-0 overflow-hidden'}`}>
+        {showFilters && (
+          <PropertyFilters
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            propertyType={propertyType}
+            setPropertyType={setPropertyType}
+            bedrooms={bedrooms}
+            setBedrooms={setBedrooms}
+            bathrooms={bathrooms}
+            setBathrooms={setBathrooms}
+            priceRange={priceRange}
+            setPriceRange={setPriceRange}
+            status={status}
+            setStatus={setStatus}
+            onResetFilters={resetFilters}
+          />
+        )}
+      </div>
       
       <PropertyGrid
         properties={filteredProperties}

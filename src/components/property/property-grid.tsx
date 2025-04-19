@@ -23,12 +23,12 @@ export function PropertyGrid({
   onResetFilters,
   isLoading = false
 }: PropertyGridProps) {
-  const [processedImageUrl, setProcessedImageUrl] = useState<string>("/lovable-uploads/1db02422-8cd7-4d1f-b4c6-813d5ca1afa5.png");
+  const [processedImageUrl, setProcessedImageUrl] = useState<string>("/lovable-uploads/684859ac-ab3f-4a87-9880-111b48770997.png");
 
   useEffect(() => {
     const processImage = async () => {
       try {
-        const response = await fetch("/lovable-uploads/1db02422-8cd7-4d1f-b4c6-813d5ca1afa5.png");
+        const response = await fetch("/lovable-uploads/684859ac-ab3f-4a87-9880-111b48770997.png");
         const blob = await response.blob();
         const img = await loadImage(blob);
         const processedBlob = await removeBackground(img);

@@ -39,9 +39,7 @@ const App = () => {
     // Configure session persistence for 7 days
     if (session) {
       // Set longer expiration using cookies
-      supabase.auth.refreshSession({
-        refreshToken: session.refresh_token,
-      });
+      supabase.auth.refreshSession({ refresh_token: session.refresh_token });
     }
 
     return () => subscription.unsubscribe();

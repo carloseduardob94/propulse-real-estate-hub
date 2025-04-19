@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   name: z.string().min(3, { message: "O nome deve ter pelo menos 3 caracteres" }),
@@ -33,6 +34,7 @@ export function RegisterForm({ onSubmit, onLoginClick, className }: RegisterForm
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -164,9 +166,22 @@ export function RegisterForm({ onSubmit, onLoginClick, className }: RegisterForm
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="terms"
+              checked={acceptedTerms}
+              onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
+            />
+            <Label
+              htmlFor="terms"
+              className="text-sm text-muted-foreground"
+            >
+              Li e aceito os termos de uso e política de privacidade
+            </Label>
+          </div>
           <Button 
             type="submit" 
-            disabled={isSubmitting} 
+            disabled={isSubmitting || !acceptedTerms} 
             className="w-full"
           >
             {isSubmitting ? "Cadastrando..." : "Cadastrar"}

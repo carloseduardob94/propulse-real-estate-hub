@@ -10,7 +10,7 @@ interface PropertyDialogProps {
 }
 
 export function PropertyDialog({ isOpen, onOpenChange }: PropertyDialogProps) {
-  const { addProperty } = useProperties();
+  const { addProperty } = useProperties();  // This hook should handle the userId internally
   const { toast } = useToast();
 
   const handleSubmit = async (data: any) => {

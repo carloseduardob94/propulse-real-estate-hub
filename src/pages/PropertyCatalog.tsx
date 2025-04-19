@@ -86,7 +86,7 @@ export default function PropertyCatalog() {
   });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const { properties, isLoading, fetchProperties, addProperty } = useProperties(user.id);
+  const { properties, isLoading, fetchProperties } = useProperties(user.id);
 
   useEffect(() => {
     const getUserProfile = async () => {
@@ -168,13 +168,6 @@ export default function PropertyCatalog() {
     }
   };
 
-  const onPropertySubmit = async (data: any) => {
-    const success = await addProperty(data);
-    if (success) {
-      setIsDialogOpen(false);
-    }
-  };
-
   const toggleFilters = () => {
     setShowFilters(prev => !prev);
   };
@@ -190,7 +183,6 @@ export default function PropertyCatalog() {
       <PropertyDialog 
         isOpen={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        onSubmit={onPropertySubmit}
       />
     </Dialog>
   );

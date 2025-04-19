@@ -9,7 +9,206 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      leads: {
+        Row: {
+          budget: number | null
+          created_at: string
+          email: string
+          id: string
+          lead_score: number | null
+          message: string | null
+          name: string
+          phone: string | null
+          preferred_location: string | null
+          property_type: string[] | null
+          status: string | null
+          updated_at: string
+          user_id: string
+          webhook_response: string | null
+          webhook_sent: boolean | null
+        }
+        Insert: {
+          budget?: number | null
+          created_at?: string
+          email: string
+          id?: string
+          lead_score?: number | null
+          message?: string | null
+          name: string
+          phone?: string | null
+          preferred_location?: string | null
+          property_type?: string[] | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+          webhook_response?: string | null
+          webhook_sent?: boolean | null
+        }
+        Update: {
+          budget?: number | null
+          created_at?: string
+          email?: string
+          id?: string
+          lead_score?: number | null
+          message?: string | null
+          name?: string
+          phone?: string | null
+          preferred_location?: string | null
+          property_type?: string[] | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+          webhook_response?: string | null
+          webhook_sent?: boolean | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          company_logo: string | null
+          company_name: string | null
+          created_at: string
+          id: string
+          name: string | null
+          plan: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_logo?: string | null
+          company_name?: string | null
+          created_at?: string
+          id: string
+          name?: string | null
+          plan?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_logo?: string | null
+          company_name?: string | null
+          created_at?: string
+          id?: string
+          name?: string | null
+          plan?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      properties: {
+        Row: {
+          address: string
+          area: number
+          bathrooms: number
+          bedrooms: number
+          city: string
+          created_at: string
+          description: string | null
+          featured: boolean | null
+          id: string
+          images: string[] | null
+          parking_spaces: number | null
+          price: number
+          state: string
+          status: string
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+          zip_code: string | null
+        }
+        Insert: {
+          address: string
+          area?: number
+          bathrooms?: number
+          bedrooms?: number
+          city: string
+          created_at?: string
+          description?: string | null
+          featured?: boolean | null
+          id?: string
+          images?: string[] | null
+          parking_spaces?: number | null
+          price: number
+          state: string
+          status: string
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string
+          area?: number
+          bathrooms?: number
+          bedrooms?: number
+          city?: string
+          created_at?: string
+          description?: string | null
+          featured?: boolean | null
+          id?: string
+          images?: string[] | null
+          parking_spaces?: number | null
+          price?: number
+          state?: string
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
+      proposals: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          lead_id: string | null
+          pdf_url: string | null
+          property_ids: string[] | null
+          share_link: string | null
+          status: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          lead_id?: string | null
+          pdf_url?: string | null
+          property_ids?: string[] | null
+          share_link?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          lead_id?: string | null
+          pdf_url?: string | null
+          property_ids?: string[] | null
+          share_link?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposals_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

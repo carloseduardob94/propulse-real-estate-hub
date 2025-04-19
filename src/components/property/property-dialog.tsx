@@ -3,6 +3,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { PropertyForm } from "@/components/ui/property-form";
 import { useProperties } from "@/hooks/use-properties";
 import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PropertyDialogProps {
   isOpen: boolean;
@@ -10,8 +12,21 @@ interface PropertyDialogProps {
 }
 
 export function PropertyDialog({ isOpen, onOpenChange }: PropertyDialogProps) {
-  const { addProperty } = useProperties();  // This hook should handle the userId internally
+  const [userId, setUserId] = useState<string>("");
+  const { addProperty } = useProperties(userId);
   const { toast } = useToast();
+
+  // Get the current user's ID when the component mounts
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUserId(session.user.id);
+      }
+    };
+
+    fetchUserId();
+  }, []);
 
   const handleSubmit = async (data: any) => {
     try {

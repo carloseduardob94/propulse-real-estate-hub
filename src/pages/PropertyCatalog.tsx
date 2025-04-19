@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Share2, Filter, X } from "lucide-react";
@@ -9,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Property } from "@/types";
 import { PropertyFilters } from "@/components/property/property-filters";
 import { PropertyGrid } from "@/components/property/property-grid";
+import { PropertyForm } from "@/components/ui/property-form";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { useToast } from "@/hooks/use-toast";
 
@@ -224,14 +224,50 @@ export default function PropertyCatalog() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const onPropertySubmit = async (data: any) => {
+    try {
+      const dbData = {
+        title: data.title,
+        description: data.description,
+        price: parseFloat(data.price),
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        zip_code: data.zipCode,
+        bedrooms: parseInt(data.bedrooms),
+        bathrooms: parseInt(data.bathrooms),
+        area: parseFloat(data.area),
+        parking_spaces: parseInt(data.parkingSpaces || 0),
+        type: data.type,
+        status: data.status,
+        images: data.images || [],
+        user_id: user.id
+      };
+
+      const { error } = await supabase
+        .from('properties')
+        .insert([dbData]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Imóvel cadastrado com sucesso!",
+        description: "O imóvel foi adicionado ao seu catálogo.",
+      });
+      setIsDialogOpen(false);
+      fetchProperties(user.id);
+    } catch (error: any) {
+      toast({
+        title: "Erro ao cadastrar imóvel",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const AddPropertyForm = () => (
-    <div className="space-y-4 py-4">
-      <p className="text-center text-muted-foreground">
-        Formulário de cadastro de imóveis será implementado aqui.
-      </p>
-      <div className="flex justify-center">
-        <Button onClick={() => setIsDialogOpen(false)}>Fechar</Button>
-      </div>
+    <div className="py-4">
+      <PropertyForm onSubmit={onPropertySubmit} />
     </div>
   );
 
@@ -276,11 +312,11 @@ export default function PropertyCatalog() {
           Novo Imóvel
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="w-full sm:max-w-[800px] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Cadastrar novo imóvel</DialogTitle>
+          <DialogTitle>Cadastrar Novo Imóvel</DialogTitle>
           <DialogDescription>
-            Preencha as informações do imóvel para adicioná-lo ao sistema.
+            Preencha os dados do imóvel para cadastrá-lo em seu portfólio.
           </DialogDescription>
         </DialogHeader>
         <AddPropertyForm />
@@ -324,6 +360,18 @@ export default function PropertyCatalog() {
           onResetFilters={resetFilters}
           isLoading={isLoading}
         />
+
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="w-full sm:max-w-[800px] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Cadastrar Novo Imóvel</DialogTitle>
+              <DialogDescription>
+                Preencha os dados do imóvel para cadastrá-lo em seu portfólio.
+              </DialogDescription>
+            </DialogHeader>
+            <AddPropertyForm />
+          </DialogContent>
+        </Dialog>
       </PageLayout>
     </>
   );

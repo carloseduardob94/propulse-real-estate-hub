@@ -312,7 +312,7 @@ export default function PropertyCatalog() {
           Novo Imóvel
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-full sm:max-w-[800px] overflow-y-auto">
+      <DialogContent className="w-full max-h-[80vh] sm:max-w-[600px] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Cadastrar Novo Imóvel</DialogTitle>
           <DialogDescription>
@@ -362,7 +362,7 @@ export default function PropertyCatalog() {
         />
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="w-full sm:max-w-[800px] overflow-y-auto">
+          <DialogContent className="w-full max-h-[80vh] sm:max-w-[600px] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Cadastrar Novo Imóvel</DialogTitle>
               <DialogDescription>

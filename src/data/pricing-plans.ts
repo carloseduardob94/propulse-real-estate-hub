@@ -25,6 +25,12 @@ export const PRICING_PLANS: PlanDetails[] = [
         title: "Propostas Básicas",
         description: "Crie propostas simples em PDF",
         includedIn: ["free", "monthly", "yearly"]
+      },
+      {
+        id: "free-4",
+        title: "Suporte limitado via base de conhecimento",
+        description: "Acesso à documentação e tutoriais",
+        includedIn: ["free"]
       }
     ],
     maxProperties: 3,
@@ -35,7 +41,7 @@ export const PRICING_PLANS: PlanDetails[] = [
   {
     id: "monthly",
     name: "Profissional",
-    price: 97,
+    price: 79.90,
     period: "monthly",
     features: [
       {
@@ -46,20 +52,26 @@ export const PRICING_PLANS: PlanDetails[] = [
       },
       {
         id: "pro-2",
-        title: "Qualificação automática de leads com Yzze (IA)",
-        description: "Otimize suas vendas com IA",
+        title: "Qualificação automática de leads com Yzze",
+        description: "Otimize suas vendas",
         includedIn: ["monthly", "yearly"]
       },
       {
         id: "pro-3",
-        title: "Propostas ilimitadas com Yzze (IA)",
-        description: "Crie propostas profissionais com IA",
+        title: "Propostas ilimitadas com Yzze",
+        description: "Crie propostas profissionais",
         includedIn: ["monthly", "yearly"]
       },
       {
         id: "pro-4",
-        title: "Automações via n8n",
-        description: "Integre com outras ferramentas",
+        title: "Automatize processos como envio de mensagens no WhatsApp, resposta rápida a leads, notificações e muito mais",
+        description: "Aumente sua produtividade",
+        includedIn: ["monthly", "yearly"]
+      },
+      {
+        id: "pro-5",
+        title: "Suporte via e-mail e WhatsApp comercial",
+        description: "Atendimento personalizado",
         includedIn: ["monthly", "yearly"]
       }
     ],
@@ -72,7 +84,7 @@ export const PRICING_PLANS: PlanDetails[] = [
   {
     id: "yearly",
     name: "Profissional Anual",
-    price: 970,
+    price: 799,
     period: "yearly",
     features: [
       {
@@ -86,6 +98,12 @@ export const PRICING_PLANS: PlanDetails[] = [
         title: "2 Meses Grátis",
         description: "Economize pagando anualmente",
         includedIn: ["yearly"]
+      },
+      {
+        id: "yearly-3",
+        title: "Suporte prioritário via WhatsApp e consultoria personalizada",
+        description: "Atendimento VIP",
+        includedIn: ["yearly"]
       }
     ],
     highlightedFeature: "Melhor Custo-Benefício",
@@ -95,3 +113,4 @@ export const PRICING_PLANS: PlanDetails[] = [
     supportsPdfExport: true
   }
 ];
+

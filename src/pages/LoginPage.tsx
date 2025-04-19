@@ -1,74 +1,127 @@
 
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { Navbar } from "@/components/layout/navbar";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { LoginForm } from "@/components/auth/login-form";
 import { RegisterForm } from "@/components/auth/register-form";
 import { useToast } from "@/hooks/use-toast";
+import { Logo } from "@/components/brand/logo";
+import { AvatarUpload } from "@/components/auth/avatar-upload";
+import { supabase } from "@/integrations/supabase/client";
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [session, setSession] = useState(supabase.auth.getSession());
 
-  const handleLogin = (data: any) => {
-    // Simulated login - in a real app, this would call an authentication service
-    console.log("Login data:", data);
-    
-    // Show success toast
-    toast({
-      title: "Login realizado com sucesso!",
-      description: "Redirecionando para o dashboard...",
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) navigate('/dashboard');
     });
-    
-    // Redirect to dashboard after a short delay
-    setTimeout(() => {
-      navigate("/dashboard");
-    }, 1500);
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) navigate('/dashboard');
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const handleLogin = async (data: any) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Login realizado com sucesso!",
+        description: "Redirecionando para o dashboard...",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro no login",
+        description: error.message === "Invalid login credentials" 
+          ? "Email ou senha incorretos" 
+          : "Ocorreu um erro ao fazer login",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleRegister = (data: any) => {
-    // Simulated registration - in a real app, this would call an authentication service
-    console.log("Register data:", data);
-    
-    // Show success toast
-    toast({
-      title: "Cadastro realizado com sucesso!",
-      description: "Você já pode fazer login com suas credenciais.",
-    });
-    
-    // Switch to login form after registration
-    setIsLogin(true);
-  };
+  const handleRegister = async (data: any) => {
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            name: data.name,
+          },
+        },
+      });
 
-  const toggleForm = () => {
-    setIsLogin(!isLogin);
+      if (error) throw error;
+
+      toast({
+        title: "Cadastro realizado com sucesso!",
+        description: "Você já pode fazer login com suas credenciais.",
+      });
+      
+      setIsLogin(true);
+    } catch (error: any) {
+      toast({
+        title: "Erro no cadastro",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      
-      <main className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
-        <div className="w-full max-w-md">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-propulse-50 via-white to-propulse-50">
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="bg-white/80 backdrop-blur-lg w-full max-w-lg p-8 rounded-2xl shadow-xl space-y-8">
+          <div className="text-center space-y-2">
+            <Logo className="mx-auto" />
+            <h1 className="text-2xl font-bold text-gray-900">
+              {isLogin ? "Bem-vindo de volta!" : "Criar nova conta"}
+            </h1>
+            <p className="text-gray-600">
+              {isLogin 
+                ? "Entre com suas credenciais para acessar sua conta" 
+                : "Preencha os dados abaixo para criar sua conta"}
+            </p>
+          </div>
+
           {isLogin ? (
             <LoginForm 
               onSubmit={handleLogin} 
-              onRegisterClick={toggleForm} 
+              onRegisterClick={() => setIsLogin(false)} 
             />
           ) : (
-            <RegisterForm 
-              onSubmit={handleRegister} 
-              onLoginClick={toggleForm} 
-            />
+            <>
+              <AvatarUpload 
+                user={null}
+                onUploadComplete={(url) => {
+                  console.log('Avatar URL:', url);
+                  // Será usado quando implementarmos o perfil do usuário
+                }}
+              />
+              <RegisterForm 
+                onSubmit={handleRegister} 
+                onLoginClick={() => setIsLogin(true)} 
+              />
+            </>
           )}
         </div>
-      </main>
+      </div>
       
-      <footer className="py-6 bg-white border-t">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} MeuCorretorPRO. Todos os direitos reservados.</p>
-        </div>
+      <footer className="py-6 text-center text-sm text-gray-600">
+        &copy; {new Date().getFullYear()} MeuCorretorPRO. Todos os direitos reservados.
       </footer>
     </div>
   );

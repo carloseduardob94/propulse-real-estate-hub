@@ -39,7 +39,7 @@ const formSchema = z.object({
   type: z.enum(["apartment", "house", "commercial", "land"]),
   status: z.enum(["forSale", "forRent", "sold", "rented"]),
   featured: z.boolean().default(false),
-  images: z.array(z.string()).min(3, { message: "Adicione pelo menos 3 imagens" }).max(20, { message: "Máximo de 20 imagens permitidas" }),
+  images: z.array(z.string()).default([]),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -54,6 +54,7 @@ export function PropertyForm({ property, onSubmit, className }: PropertyFormProp
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [images, setImages] = useState<File[]>([]);
+  const [imageValidationError, setImageValidationError] = useState<string | null>(null);
 
   const defaultValues: Partial<FormValues> = property
     ? {
@@ -111,6 +112,7 @@ export function PropertyForm({ property, onSubmit, className }: PropertyFormProp
       }
 
       setImages(prev => [...prev, ...newFiles]);
+      setImageValidationError(null);
     }
   };
 
@@ -119,6 +121,11 @@ export function PropertyForm({ property, onSubmit, className }: PropertyFormProp
   };
 
   const handleSubmit = async (values: FormValues) => {
+    if (images.length < 3 && (!property || !property.images || property.images.length < 3)) {
+      setImageValidationError("Adicione pelo menos 3 imagens");
+      return;
+    }
+    
     setIsSubmitting(true);
     try {
       const imageUrls = await Promise.all(
@@ -139,9 +146,10 @@ export function PropertyForm({ property, onSubmit, className }: PropertyFormProp
         })
       );
 
+      const combinedImages = property?.images || [];
       const propertyData = {
         ...values,
-        images: imageUrls,
+        images: [...combinedImages, ...imageUrls],
       };
 
       if (onSubmit) {
@@ -397,6 +405,17 @@ export function PropertyForm({ property, onSubmit, className }: PropertyFormProp
                   </button>
                 </div>
               ))}
+              
+              {property?.images && property.images.map((imageUrl, index) => (
+                <div key={`existing-${index}`} className="relative">
+                  <img 
+                    src={imageUrl} 
+                    alt={`Imagem existente ${index + 1}`} 
+                    className="w-full h-20 object-cover rounded-md"
+                  />
+                </div>
+              ))}
+              
               {images.length < 20 && (
                 <label className="flex items-center justify-center border-2 border-dashed rounded-md h-20 cursor-pointer hover:bg-gray-100">
                   <input
@@ -410,9 +429,13 @@ export function PropertyForm({ property, onSubmit, className }: PropertyFormProp
                 </label>
               )}
             </div>
-            {form.formState.errors.images && (
-              <p className="text-sm text-red-500">{form.formState.errors.images.message}</p>
+            {imageValidationError && (
+              <p className="text-sm text-red-500">{imageValidationError}</p>
             )}
+            <p className="text-xs text-gray-500">
+              {images.length} imagens adicionadas. {property?.images ? property.images.length : 0} imagens existentes. 
+              (Mínimo: 3, Máximo: 20)
+            </p>
           </div>
         </CardContent>
         <CardFooter>

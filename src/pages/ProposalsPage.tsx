@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { Button } from "@/components/ui/button";
@@ -8,8 +7,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { supabase } from "@/integrations/supabase/client";
 import { UserProfile } from "@/types/auth";
 import { useNavigate } from "react-router-dom";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
-// Mock proposals data
 const MOCK_PROPOSALS = [
   {
     id: "1",
@@ -58,7 +57,9 @@ export default function ProposalsPage() {
     company_name: null
   });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
   useEffect(() => {
     const getUserProfile = async () => {
       try {
@@ -140,7 +141,6 @@ export default function ProposalsPage() {
     }
   };
   
-  // Placeholder for the Add Proposal functionality
   const AddProposalForm = () => (
     <div className="space-y-4 py-4">
       <p className="text-center text-muted-foreground">
@@ -152,6 +152,16 @@ export default function ProposalsPage() {
     </div>
   );
   
+  const indexOfLastProposal = currentPage * itemsPerPage;
+  const indexOfFirstProposal = indexOfLastProposal - itemsPerPage;
+  const currentProposals = proposals.slice(indexOfFirstProposal, indexOfLastProposal);
+  const totalPages = Math.ceil(proposals.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar 
@@ -190,7 +200,7 @@ export default function ProposalsPage() {
         
         {/* Proposals grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {proposals.map((proposal) => (
+          {currentProposals.map((proposal) => (
             <Card key={proposal.id} className="overflow-hidden hover:shadow-md transition-shadow">
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
@@ -242,6 +252,37 @@ export default function ProposalsPage() {
             </Card>
           ))}
         </div>
+
+        {totalPages > 1 && (
+          <div className="mt-8 flex justify-center">
+            <Pagination>
+              <PaginationContent>
+                {currentPage > 1 && (
+                  <PaginationItem>
+                    <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} />
+                  </PaginationItem>
+                )}
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      onClick={() => handlePageChange(page)}
+                      isActive={currentPage === page}
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+
+                {currentPage < totalPages && (
+                  <PaginationItem>
+                    <PaginationNext onClick={() => handlePageChange(currentPage + 1)} />
+                  </PaginationItem>
+                )}
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </main>
       
       <footer className="py-6 bg-white border-t">

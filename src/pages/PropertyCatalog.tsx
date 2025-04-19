@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { PropertyCardWithSlider } from "@/components/ui/property-card-with-slider";
@@ -17,32 +16,29 @@ export default function PropertyCatalog() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  
-  // Filter states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
+
   const [searchTerm, setSearchTerm] = useState("");
   const [propertyType, setPropertyType] = useState<string>("all");
   const [bedrooms, setBedrooms] = useState<number[]>([0]);
   const [bathrooms, setBathrooms] = useState<number[]>([0]);
   const [priceRange, setPriceRange] = useState<number[]>([0, 10000000]);
   const [status, setStatus] = useState<string>("all");
-  
+
   useEffect(() => {
-    // In a real app, this would fetch from an API
     setProperties(MOCK_PROPERTIES);
     setFilteredProperties(MOCK_PROPERTIES);
     
-    // Set initial price range based on min/max prices in data
     const prices = MOCK_PROPERTIES.map(p => p.price);
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
     setPriceRange([minPrice, maxPrice]);
-    
   }, []);
-  
+
   useEffect(() => {
     let result = [...properties];
     
-    // Apply search filter
     if (searchTerm) {
       result = result.filter(property => 
         property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -52,34 +48,29 @@ export default function PropertyCatalog() {
       );
     }
     
-    // Apply property type filter
     if (propertyType !== "all") {
       result = result.filter(property => property.type === propertyType);
     }
     
-    // Apply bedroom filter
     if (bedrooms[0] > 0) {
       result = result.filter(property => property.bedrooms >= bedrooms[0]);
     }
     
-    // Apply bathroom filter
     if (bathrooms[0] > 0) {
       result = result.filter(property => property.bathrooms >= bathrooms[0]);
     }
     
-    // Apply price range filter
     result = result.filter(property => 
       property.price >= priceRange[0] && property.price <= priceRange[1]
     );
     
-    // Apply status filter
     if (status !== "all") {
       result = result.filter(property => property.status === status);
     }
     
     setFilteredProperties(result);
   }, [properties, searchTerm, propertyType, bedrooms, bathrooms, priceRange, status]);
-  
+
   const handleShareCatalog = () => {
     const url = window.location.href;
     
@@ -100,14 +91,13 @@ export default function PropertyCatalog() {
       });
     }
   };
-  
+
   const resetFilters = () => {
     setSearchTerm("");
     setPropertyType("all");
     setBedrooms([0]);
     setBathrooms([0]);
     
-    // Reset price range to min/max in data
     const prices = properties.map(p => p.price);
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
@@ -115,7 +105,17 @@ export default function PropertyCatalog() {
     
     setStatus("all");
   };
-  
+
+  const indexOfLastProperty = currentPage * itemsPerPage;
+  const indexOfFirstProperty = indexOfLastProperty - itemsPerPage;
+  const currentProperties = filteredProperties.slice(indexOfFirstProperty, indexOfLastProperty);
+  const totalPages = Math.ceil(filteredProperties.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
@@ -151,7 +151,6 @@ export default function PropertyCatalog() {
         </div>
       </div>
       
-      {/* Filters Section */}
       {showFilters && (
         <div className="border-b bg-white shadow-sm">
           <div className="container mx-auto px-4 py-6">
@@ -246,7 +245,6 @@ export default function PropertyCatalog() {
         </div>
       )}
       
-      {/* Properties Grid */}
       <main className="flex-1 container mx-auto px-4 py-8">
         {filteredProperties.length === 0 ? (
           <div className="text-center py-12">
@@ -259,15 +257,48 @@ export default function PropertyCatalog() {
           <>
             <div className="flex justify-between items-center mb-6">
               <p className="text-muted-foreground">
-                Exibindo <span className="font-medium text-foreground">{filteredProperties.length}</span> imóveis
+                Exibindo <span className="font-medium text-foreground">
+                  {indexOfFirstProperty + 1}-{Math.min(indexOfLastProperty, filteredProperties.length)}
+                </span> de <span className="font-medium text-foreground">{filteredProperties.length}</span> imóveis
               </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProperties.map((property) => (
+              {currentProperties.map((property) => (
                 <PropertyCardWithSlider key={property.id} property={property} />
               ))}
             </div>
+
+            {totalPages > 1 && (
+              <div className="mt-8 flex justify-center">
+                <Pagination>
+                  <PaginationContent>
+                    {currentPage > 1 && (
+                      <PaginationItem>
+                        <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} />
+                      </PaginationItem>
+                    )}
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          onClick={() => handlePageChange(page)}
+                          isActive={currentPage === page}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+
+                    {currentPage < totalPages && (
+                      <PaginationItem>
+                        <PaginationNext onClick={() => handlePageChange(currentPage + 1)} />
+                      </PaginationItem>
+                    )}
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
           </>
         )}
       </main>

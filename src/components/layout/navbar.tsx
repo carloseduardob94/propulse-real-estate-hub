@@ -1,0 +1,187 @@
+
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu, X, User, Home, Users, FileText, BadgeDollarSign, LogOut } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+interface NavbarProps {
+  isAuthenticated?: boolean;
+  user?: {
+    name: string;
+    email: string;
+    plan: 'free' | 'monthly' | 'yearly';
+  };
+  onLogout?: () => void;
+}
+
+export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const isMobile = useIsMobile();
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
+  const getPlanBadge = (plan: 'free' | 'monthly' | 'yearly') => {
+    switch (plan) {
+      case 'free':
+        return <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">Free</span>;
+      case 'monthly':
+        return <span className="ml-2 text-xs bg-propulse-100 text-propulse-600 px-2 py-1 rounded-full">Mensal</span>;
+      case 'yearly':
+        return <span className="ml-2 text-xs bg-success-100 text-success-600 px-2 py-1 rounded-full">Anual</span>;
+      default:
+        return null;
+    }
+  };
+
+  const navLinks = [
+    { href: "/", label: "Início", icon: Home },
+    { href: "/properties", label: "Imóveis", icon: Home },
+    { href: "/leads", label: "Leads", icon: Users },
+    { href: "/proposals", label: "Propostas", icon: FileText },
+    { href: "/plans", label: "Planos", icon: BadgeDollarSign },
+  ];
+
+  const renderMobileMenu = () => (
+    <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="md:hidden">
+          <Menu className="h-6 w-6" />
+          <span className="sr-only">Toggle menu</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-[280px] sm:w-[350px]">
+        <div className="flex flex-col h-full">
+          <div className="flex items-center justify-between py-4">
+            <Link to="/" className="flex items-center gap-2" onClick={closeMenu}>
+              <span className="font-bold text-xl text-propulse-800">PropulseHub</span>
+            </Link>
+            <Button variant="ghost" size="icon" onClick={closeMenu}>
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+
+          <div className="flex-1 my-4">
+            <nav className="flex flex-col space-y-1">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className="flex items-center gap-3 px-3 py-2 rounded-md text-sm hover:bg-muted"
+                  onClick={closeMenu}
+                >
+                  <link.icon className="h-5 w-5" />
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          <div className="border-t py-4">
+            {isAuthenticated ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-4 px-3">
+                  <Avatar>
+                    <AvatarFallback>{user?.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{user?.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                    {user?.plan && getPlanBadge(user.plan)}
+                  </div>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
+                  onClick={() => {
+                    if (onLogout) onLogout();
+                    closeMenu();
+                  }}
+                >
+                  <LogOut className="h-5 w-5 mr-2" />
+                  Sair
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col space-y-2 px-3">
+                <Button asChild>
+                  <Link to="/login" onClick={closeMenu}>Entrar</Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to="/register" onClick={closeMenu}>Cadastre-se</Link>
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+
+  const renderDesktopMenu = () => (
+    <div className="hidden md:flex items-center gap-6">
+      {navLinks.map((link) => (
+        <Link
+          key={link.href}
+          to={link.href}
+          className="text-sm font-medium hover:text-propulse-600 transition-colors"
+        >
+          {link.label}
+        </Link>
+      ))}
+    </div>
+  );
+
+  const renderAuthButtons = () => {
+    if (isAuthenticated) {
+      return (
+        <div className="hidden md:flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback>{user?.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div className="hidden lg:block">
+              <p className="text-sm font-medium">{user?.name}</p>
+              {user?.plan && getPlanBadge(user.plan)}
+            </div>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onLogout}>
+            <LogOut className="h-5 w-5" />
+            <span className="sr-only">Logout</span>
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="hidden md:flex items-center gap-4">
+        <Button variant="ghost" asChild>
+          <Link to="/login">Entrar</Link>
+        </Button>
+        <Button asChild>
+          <Link to="/register">Cadastre-se</Link>
+        </Button>
+      </div>
+    );
+  };
+
+  return (
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <Link to="/" className="flex items-center gap-2">
+            <span className="font-bold text-xl text-propulse-800">PropulseHub</span>
+          </Link>
+          {renderDesktopMenu()}
+        </div>
+
+        {renderAuthButtons()}
+        {renderMobileMenu()}
+      </div>
+    </header>
+  );
+}

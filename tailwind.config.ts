@@ -52,6 +52,33 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// PropulseHub custom colors
+				propulse: {
+					50: '#f0f5ff',
+					100: '#e0eaff',
+					200: '#c7d7fe',
+					300: '#a5b9fc',
+					400: '#8193f8',
+					500: '#5e69f1',
+					600: '#4b4ae4',
+					700: '#3e3bc8',
+					800: '#3432a2',
+					900: '#1e3a8a',
+					950: '#172554',
+				},
+				success: {
+					50: '#ecfdf5',
+					100: '#d1fae5',
+					200: '#a7f3d0',
+					300: '#6ee7b7',
+					400: '#34d399',
+					500: '#10b981',
+					600: '#059669',
+					700: '#047857',
+					800: '#065f46',
+					900: '#064e3b',
+					950: '#022c22',
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',

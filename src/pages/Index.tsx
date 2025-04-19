@@ -1,12 +1,12 @@
 
 import { useState } from "react";
 import { Navbar } from "@/components/layout/navbar";
-import { PropertyCard } from "@/components/ui/property-card";
+import { PropertyCardWithSlider } from "@/components/ui/property-card-with-slider";
 import { PricingCard } from "@/components/ui/pricing-card";
 import { Button } from "@/components/ui/button";
 import { LeadForm } from "@/components/ui/lead-form";
 import { MOCK_PROPERTIES, PRICING_PLANS } from "@/data/mock-data";
-import { Home, Users, FileText, ChevronRight, Check } from "lucide-react";
+import { Home, Users, FileText, ChevronRight, Check, ArrowRight } from "lucide-react";
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -43,17 +43,30 @@ const Index = () => {
                 qualificarem leads e gerarem propostas profissionais.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  size="lg" 
-                  className="bg-white text-propulse-700 hover:bg-propulse-50"
-                  onClick={handleLoginDemo}
-                >
-                  Começar agora
-                </Button>
+                {isAuthenticated ? (
+                  <Button 
+                    size="lg" 
+                    className="bg-white text-propulse-700 hover:bg-propulse-50 group"
+                    asChild
+                  >
+                    <a href="/dashboard">
+                      Acessar Dashboard
+                      <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    </a>
+                  </Button>
+                ) : (
+                  <Button 
+                    size="lg" 
+                    className="bg-white text-propulse-700 hover:bg-propulse-50"
+                    onClick={handleLoginDemo}
+                  >
+                    Começar agora
+                  </Button>
+                )}
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="border-white text-white hover:bg-white/10"
+                  className="border-white text-white hover:bg-white/10 hover:border-white transition-colors"
                   asChild
                 >
                   <a href="#features">Saiba mais</a>
@@ -120,15 +133,15 @@ const Index = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredProperties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
+              <PropertyCardWithSlider key={property.id} property={property} />
             ))}
           </div>
           
           <div className="text-center mt-10">
-            <Button asChild>
-              <a href="#" className="inline-flex items-center">
+            <Button asChild className="group">
+              <a href="/properties" className="inline-flex items-center">
                 Ver todos os imóveis
-                <ChevronRight className="ml-2 h-4 w-4" />
+                <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </a>
             </Button>
           </div>

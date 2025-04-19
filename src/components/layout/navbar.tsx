@@ -85,8 +85,9 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
             {isAuthenticated ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-4 px-3">
-                  <Avatar>
-                    <AvatarFallback>{user?.name.charAt(0)}</AvatarFallback>
+                  <Avatar className="border-2 border-propulse-200">
+                    <AvatarImage src={user?.name ? `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random` : undefined} />
+                    <AvatarFallback className="bg-propulse-100 text-propulse-700">{user?.name?.charAt(0) || '?'}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{user?.name}</p>
@@ -140,19 +141,19 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
     if (isAuthenticated) {
       return (
         <div className="hidden md:flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback>{user?.name.charAt(0)}</AvatarFallback>
+          <div className="flex items-center gap-3 px-4 py-2 bg-white/50 backdrop-blur-sm rounded-full border shadow-sm">
+            <Avatar className="h-8 w-8 border-2 border-propulse-100">
+              <AvatarImage src={user?.name ? `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random` : undefined} />
+              <AvatarFallback className="bg-propulse-100 text-propulse-700">{user?.name?.charAt(0) || '?'}</AvatarFallback>
             </Avatar>
             <div className="hidden lg:block">
               <p className="text-sm font-medium">{user?.name}</p>
               {user?.plan && getPlanBadge(user.plan)}
             </div>
+            <Button variant="ghost" size="icon" className="ml-1" onClick={onLogout}>
+              <LogOut className="h-5 w-5 text-gray-500 hover:text-red-500 transition-colors" />
+            </Button>
           </div>
-          <Button variant="ghost" size="icon" onClick={onLogout}>
-            <LogOut className="h-5 w-5" />
-            <span className="sr-only">Logout</span>
-          </Button>
         </div>
       );
     }

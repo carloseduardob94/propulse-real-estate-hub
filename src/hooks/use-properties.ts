@@ -72,6 +72,7 @@ export const useProperties = (userId: string) => {
         type: data.type,
         status: data.status,
         images: data.images || [],
+        featured: data.featured || false,
         user_id: userId
       };
 
@@ -98,10 +99,82 @@ export const useProperties = (userId: string) => {
     }
   };
 
+  const updateProperty = async (id: string, data: any) => {
+    try {
+      const dbData = {
+        title: data.title,
+        description: data.description,
+        price: parseFloat(data.price),
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        zip_code: data.zipCode,
+        bedrooms: parseInt(data.bedrooms),
+        bathrooms: parseInt(data.bathrooms),
+        area: parseFloat(data.area),
+        parking_spaces: parseInt(data.parkingSpaces || 0),
+        type: data.type,
+        status: data.status,
+        images: data.images || [],
+        featured: data.featured || false
+      };
+
+      const { error } = await supabase
+        .from('properties')
+        .update(dbData)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Imóvel atualizado com sucesso!",
+        description: "As informações do imóvel foram atualizadas.",
+      });
+
+      await fetchProperties(userId);
+      return true;
+    } catch (error: any) {
+      toast({
+        title: "Erro ao atualizar imóvel",
+        description: error.message,
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
+  const deleteProperty = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', id);
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Imóvel excluído com sucesso!",
+        description: "O imóvel foi removido do seu catálogo."
+      });
+      
+      await fetchProperties(userId);
+      return true;
+    } catch (error: any) {
+      toast({
+        title: "Erro ao excluir imóvel",
+        description: error.message,
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
   return {
     properties,
     isLoading,
     fetchProperties,
-    addProperty
+    addProperty,
+    updateProperty,
+    deleteProperty
   };
 };

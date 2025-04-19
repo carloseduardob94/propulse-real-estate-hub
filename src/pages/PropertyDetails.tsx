@@ -1,26 +1,97 @@
 
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/layout/navbar";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Bed, Bath, Car, Maximize2, Share2, MapPin } from "lucide-react";
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Bed, 
+  Bath, 
+  Car, 
+  Maximize2, 
+  Share2, 
+  MapPin, 
+  Pencil,
+  Trash2 
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { MOCK_PROPERTIES } from "@/data/mock-data";
 import { Property } from "@/types";
+import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { PropertyForm } from "@/components/ui/property-form";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export default function PropertyDetails() {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [property, setProperty] = useState<Property | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCurrentUserOwner, setIsCurrentUserOwner] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  
+  const fetchProperty = async () => {
+    if (!id) return;
+    
+    setIsLoading(true);
+    
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('id', id)
+        .single();
+        
+      if (error) throw error;
+      
+      // Map database fields to our Property type
+      const formattedProperty: Property = {
+        id: data.id,
+        title: data.title,
+        description: data.description || "",
+        price: data.price,
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        zipCode: data.zip_code || "",
+        bedrooms: data.bedrooms,
+        bathrooms: data.bathrooms,
+        area: data.area,
+        parkingSpaces: data.parking_spaces || 0,
+        type: data.type as any,
+        status: data.status as any,
+        images: data.images || [],
+        featured: data.featured || false,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at
+      };
+      
+      setProperty(formattedProperty);
+      
+      // Check if current user is the owner
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && data.user_id === session.user.id) {
+        setIsCurrentUserOwner(true);
+      }
+    } catch (error) {
+      console.error("Error fetching property:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os detalhes do imóvel",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   useEffect(() => {
-    // In a real app, this would fetch from an API
-    const foundProperty = MOCK_PROPERTIES.find(p => p.id === id);
-    setProperty(foundProperty || null);
-    
+    fetchProperty();
     // Reset image index when property changes
     setCurrentImageIndex(0);
   }, [id]);
@@ -57,6 +128,94 @@ export default function PropertyDetails() {
       });
     }
   };
+
+  const handleEditProperty = async (data: any) => {
+    if (!property || !id) return;
+    
+    try {
+      const dbData = {
+        title: data.title,
+        description: data.description,
+        price: parseFloat(data.price),
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        zip_code: data.zipCode,
+        bedrooms: parseInt(data.bedrooms),
+        bathrooms: parseInt(data.bathrooms),
+        area: parseFloat(data.area),
+        parking_spaces: parseInt(data.parkingSpaces || 0),
+        type: data.type,
+        status: data.status,
+        images: data.images,
+        featured: data.featured
+      };
+
+      const { error } = await supabase
+        .from('properties')
+        .update(dbData)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Imóvel atualizado com sucesso!",
+        description: "As informações do imóvel foram atualizadas.",
+      });
+
+      setIsEditDialogOpen(false);
+      fetchProperty();
+    } catch (error: any) {
+      console.error("Error updating property:", error);
+      toast({
+        title: "Erro ao atualizar imóvel",
+        description: error.message || "Ocorreu um erro ao atualizar as informações do imóvel.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteProperty = async () => {
+    if (!id) return;
+    
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', id);
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Imóvel excluído com sucesso!",
+        description: "O imóvel foi removido do seu catálogo."
+      });
+      
+      navigate('/properties');
+    } catch (error: any) {
+      console.error("Error deleting property:", error);
+      toast({
+        title: "Erro ao excluir imóvel",
+        description: error.message || "Ocorreu um erro ao excluir o imóvel.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleteDialogOpen(false);
+    }
+  };
+  
+  if (isLoading) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Navbar />
+        <main className="flex-1 container mx-auto px-4 py-8">
+          <div className="text-center py-12">
+            <p className="text-lg">Carregando detalhes do imóvel...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
   
   if (!property) {
     return (
@@ -83,11 +242,35 @@ export default function PropertyDetails() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Image Slider and Gallery */}
           <div className="lg:col-span-2">
-            <div className="mb-4">
+            <div className="mb-4 flex justify-between items-center">
               <Link to="/properties" className="text-sm text-muted-foreground hover:text-propulse-700 inline-flex items-center">
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Voltar para imóveis
               </Link>
+              
+              {isCurrentUserOwner && (
+                <div className="flex gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="text-propulse-700 border-propulse-200 hover:bg-propulse-100"
+                    onClick={() => setIsEditDialogOpen(true)}
+                  >
+                    <Pencil className="h-4 w-4 mr-1" />
+                    Editar
+                  </Button>
+                  
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="text-red-700 border-red-200 hover:bg-red-100"
+                    onClick={() => setIsDeleteDialogOpen(true)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Excluir
+                  </Button>
+                </div>
+              )}
             </div>
             
             <div className="relative aspect-video rounded-xl overflow-hidden mb-4">
@@ -120,16 +303,22 @@ export default function PropertyDetails() {
               )}
               
               <div className="absolute top-4 left-4 flex gap-2">
-                <Badge className={property.featured ? "bg-propulse-600" : ""}>
-                  {property.featured ? "Destaque" : property.type === 'apartment' ? 'Apartamento' : 
-                   property.type === 'house' ? 'Casa' : 
-                   property.type === 'commercial' ? 'Comercial' : 'Terreno'}
-                </Badge>
+                {property.featured && (
+                  <Badge className="bg-propulse-600">
+                    Destaque
+                  </Badge>
+                )}
                 
                 <Badge variant={property.status === 'forSale' ? 'default' : 'secondary'}>
                   {property.status === 'forSale' ? 'Venda' : 
                    property.status === 'forRent' ? 'Aluguel' : 
                    property.status === 'sold' ? 'Vendido' : 'Alugado'}
+                </Badge>
+                
+                <Badge variant="propulse">
+                  {property.type === 'apartment' ? 'Apartamento' : 
+                   property.type === 'house' ? 'Casa' : 
+                   property.type === 'commercial' ? 'Comercial' : 'Terreno'}
                 </Badge>
               </div>
             </div>
@@ -235,6 +424,44 @@ export default function PropertyDetails() {
           <p>&copy; {new Date().getFullYear()} PropulseHub. Todos os direitos reservados.</p>
         </div>
       </footer>
+      
+      {/* Edit Property Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Editar Imóvel</DialogTitle>
+            <DialogDescription>
+              Atualize as informações do seu imóvel. Clique em salvar quando terminar.
+            </DialogDescription>
+          </DialogHeader>
+          <PropertyForm 
+            property={property} 
+            onSubmit={handleEditProperty} 
+            onCancel={() => setIsEditDialogOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Property Confirmation */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir imóvel</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este imóvel? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteProperty}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

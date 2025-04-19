@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/layout/navbar";
@@ -49,7 +48,6 @@ export default function PropertyDetails() {
         
       if (error) throw error;
       
-      // Map database fields to our Property type
       const formattedProperty: Property = {
         id: data.id,
         title: data.title,
@@ -73,7 +71,6 @@ export default function PropertyDetails() {
       
       setProperty(formattedProperty);
       
-      // Check if current user is the owner
       const { data: { session } } = await supabase.auth.getSession();
       if (session && data.user_id === session.user.id) {
         setIsCurrentUserOwner(true);
@@ -92,7 +89,6 @@ export default function PropertyDetails() {
   
   useEffect(() => {
     fetchProperty();
-    // Reset image index when property changes
     setCurrentImageIndex(0);
   }, [id]);
   
@@ -240,7 +236,6 @@ export default function PropertyDetails() {
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Image Slider and Gallery */}
           <div className="lg:col-span-2">
             <div className="mb-4 flex justify-between items-center">
               <Link to="/properties" className="text-sm text-muted-foreground hover:text-propulse-700 inline-flex items-center">
@@ -344,7 +339,6 @@ export default function PropertyDetails() {
             )}
           </div>
           
-          {/* Property Details */}
           <div className="lg:col-span-1">
             <Card>
               <CardContent className="p-6">
@@ -425,9 +419,8 @@ export default function PropertyDetails() {
         </div>
       </footer>
       
-      {/* Edit Property Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="w-full max-w-md">
           <DialogHeader>
             <DialogTitle>Editar Imóvel</DialogTitle>
             <DialogDescription>
@@ -438,11 +431,11 @@ export default function PropertyDetails() {
             property={property} 
             onSubmit={handleEditProperty} 
             onCancel={() => setIsEditDialogOpen(false)}
+            className="w-full"
           />
         </DialogContent>
       </Dialog>
       
-      {/* Delete Property Confirmation */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

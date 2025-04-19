@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
-import { Navbar } from "@/components/layout/navbar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { UserProfile } from "@/types/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { ProposalList } from "@/components/proposals/ProposalList";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 const MOCK_PROPOSALS = [
   {
@@ -151,6 +151,26 @@ export default function ProposalsPage() {
     </div>
   );
 
+  const actionButton = (
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogTrigger asChild>
+        <Button className="mt-4 md:mt-0">
+          <Plus className="h-4 w-4 mr-2" />
+          Nova Proposta
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Criar nova proposta</DialogTitle>
+          <DialogDescription>
+            Selecione um cliente e imóveis para criar uma proposta personalizada.
+          </DialogDescription>
+        </DialogHeader>
+        <AddProposalForm />
+      </DialogContent>
+    </Dialog>
+  );
+
   const indexOfLastProposal = currentPage * itemsPerPage;
   const indexOfFirstProposal = indexOfLastProposal - itemsPerPage;
   const currentProposals = proposals.slice(indexOfFirstProposal, indexOfLastProposal);
@@ -162,54 +182,20 @@ export default function ProposalsPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      <Navbar 
-        isAuthenticated={isAuthenticated} 
-        user={user}
-        onLogout={handleLogout}
+    <PageLayout
+      isAuthenticated={isAuthenticated}
+      user={user}
+      onLogout={handleLogout}
+      title="Propostas"
+      description="Gerencie suas propostas para clientes"
+      actionButton={actionButton}
+    >
+      <ProposalList
+        proposals={proposals}
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        onPageChange={handlePageChange}
       />
-      
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Propostas</h1>
-            <p className="text-muted-foreground">
-              Gerencie suas propostas para clientes
-            </p>
-          </div>
-          
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="mt-4 md:mt-0">
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Proposta
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>Criar nova proposta</DialogTitle>
-                <DialogDescription>
-                  Selecione um cliente e imóveis para criar uma proposta personalizada.
-                </DialogDescription>
-              </DialogHeader>
-              <AddProposalForm />
-            </DialogContent>
-          </Dialog>
-        </div>
-        
-        <ProposalList
-          proposals={proposals}
-          currentPage={currentPage}
-          itemsPerPage={itemsPerPage}
-          onPageChange={handlePageChange}
-        />
-      </main>
-      
-      <footer className="py-6 bg-white border-t">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} MeuCorretorPRO. Todos os direitos reservados.</p>
-        </div>
-      </footer>
-    </div>
+    </PageLayout>
   );
 }

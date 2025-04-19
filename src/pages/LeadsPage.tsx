@@ -1,20 +1,20 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
-import { Navbar } from "@/components/layout/navbar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Lead } from "@/types";
 import { UserProfile } from "@/types/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { Lead } from "@/types";
 import { MOCK_LEADS } from "@/data/mock-data";
 import { LeadList } from "@/components/leads/LeadList";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>(MOCK_LEADS);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const navigate = useNavigate();
-  const [user, setUser] = useState<UserProfile>({ 
+  const [user, setUser] = useState<UserProfile>({
     id: "",
     name: "", 
     email: "", 
@@ -89,55 +89,41 @@ export default function LeadsPage() {
     </div>
   );
 
+  const actionButton = (
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogTrigger asChild>
+        <Button className="mt-4 md:mt-0">
+          <Plus className="h-4 w-4 mr-2" />
+          Novo Lead
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Cadastrar novo lead</DialogTitle>
+          <DialogDescription>
+            Preencha as informações do lead para adicioná-lo ao sistema.
+          </DialogDescription>
+        </DialogHeader>
+        <AddLeadForm />
+      </DialogContent>
+    </Dialog>
+  );
+
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      <Navbar 
-        isAuthenticated={isAuthenticated} 
-        user={user}
-        onLogout={handleLogout}
+    <PageLayout
+      isAuthenticated={isAuthenticated}
+      user={user}
+      onLogout={handleLogout}
+      title="Leads"
+      description="Gerenciamento e qualificação dos seus contatos"
+      actionButton={actionButton}
+    >
+      <LeadList
+        leads={leads}
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        onPageChange={handlePageChange}
       />
-      
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Leads</h1>
-            <p className="text-muted-foreground">
-              Gerenciamento e qualificação dos seus contatos
-            </p>
-          </div>
-          
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="mt-4 md:mt-0">
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Lead
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>Cadastrar novo lead</DialogTitle>
-                <DialogDescription>
-                  Preencha as informações do lead para adicioná-lo ao sistema.
-                </DialogDescription>
-              </DialogHeader>
-              <AddLeadForm />
-            </DialogContent>
-          </Dialog>
-        </div>
-        
-        <LeadList
-          leads={leads}
-          currentPage={currentPage}
-          itemsPerPage={itemsPerPage}
-          onPageChange={handlePageChange}
-        />
-      </main>
-      
-      <footer className="py-6 bg-white border-t">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} MeuCorretorPRO. Todos os direitos reservados.</p>
-        </div>
-      </footer>
-    </div>
+    </PageLayout>
   );
 }

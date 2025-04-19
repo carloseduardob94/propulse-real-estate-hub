@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
@@ -7,46 +8,14 @@ import { UserProfile } from "@/types/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { ProposalList } from "@/components/proposals/ProposalList";
 import { PageLayout } from "@/components/layout/PageLayout";
-
-const MOCK_PROPOSALS = [
-  {
-    id: "1",
-    title: "Proposta para Apartamento Centro",
-    clientName: "João Silva",
-    createdAt: "2023-05-10T10:30:00Z",
-    propertyCount: 3,
-    status: "sent",
-  },
-  {
-    id: "2",
-    title: "Proposta Comercial Zona Sul",
-    clientName: "Maria Oliveira",
-    createdAt: "2023-05-08T14:20:00Z",
-    propertyCount: 2,
-    status: "draft",
-  },
-  {
-    id: "3",
-    title: "Casas em Condomínio",
-    clientName: "Carlos Ferreira",
-    createdAt: "2023-05-05T09:15:00Z",
-    propertyCount: 4,
-    status: "viewed",
-  },
-  {
-    id: "4",
-    title: "Imóveis para Investimento",
-    clientName: "Ana Costa",
-    createdAt: "2023-05-02T11:45:00Z",
-    propertyCount: 5,
-    status: "accepted",
-  },
-];
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProposalsPage() {
-  const [proposals, setProposals] = useState(MOCK_PROPOSALS);
+  const [proposals, setProposals] = useState<any[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [user, setUser] = useState<UserProfile>({ 
     id: "",
     name: "", 
@@ -83,17 +52,57 @@ export default function ProposalsPage() {
               avatar_url: profile?.avatar_url || null,
               company_name: profile?.company_name || null
             });
+
+            fetchProposals(userData.id);
           }
         } else {
           navigate('/login');
         }
       } catch (error) {
         console.error("Error fetching user profile:", error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar seu perfil",
+          variant: "destructive"
+        });
       }
     };
     
     getUserProfile();
-  }, [navigate]);
+  }, [navigate, toast]);
+
+  const fetchProposals = async (userId: string) => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('proposals')
+        .select('*, leads(*)')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      
+      const formattedProposals = data.map(proposal => ({
+        id: proposal.id,
+        title: proposal.title,
+        clientName: proposal.leads?.name || "Cliente sem nome",
+        createdAt: proposal.created_at,
+        propertyCount: (proposal.property_ids?.length || 0),
+        status: proposal.status || "draft"
+      }));
+      
+      setProposals(formattedProposals);
+    } catch (error) {
+      console.error("Error fetching proposals:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar suas propostas",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   const handleLogout = async () => {
     try {
@@ -103,43 +112,51 @@ export default function ProposalsPage() {
       navigate('/login');
     } catch (error: any) {
       console.error("Logout error:", error);
+      toast({
+        title: "Erro",
+        description: "Falha ao fazer logout",
+        variant: "destructive"
+      });
     }
   };
-  
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case "draft":
-        return "bg-gray-100 text-gray-700";
-      case "sent":
-        return "bg-blue-100 text-blue-700";
-      case "viewed":
-        return "bg-yellow-100 text-yellow-700";
-      case "accepted":
-        return "bg-green-100 text-green-700";
-      case "rejected":
-        return "bg-red-100 text-red-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "draft":
-        return "Rascunho";
-      case "sent":
-        return "Enviada";
-      case "viewed":
-        return "Visualizada";
-      case "accepted":
-        return "Aceita";
-      case "rejected":
-        return "Recusada";
-      default:
-        return status;
+  const handleAddProposal = async (data: any) => {
+    try {
+      const { error } = await supabase
+        .from('proposals')
+        .insert({
+          user_id: user.id,
+          title: data.title,
+          lead_id: data.leadId,
+          property_ids: data.propertyIds,
+          status: 'draft'
+        });
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Sucesso!",
+        description: "Proposta criada com sucesso"
+      });
+      
+      // Reload proposals
+      fetchProposals(user.id);
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("Error adding proposal:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível criar a proposta",
+        variant: "destructive"
+      });
     }
   };
-  
+
   const AddProposalForm = () => (
     <div className="space-y-4 py-4">
       <p className="text-center text-muted-foreground">
@@ -171,16 +188,6 @@ export default function ProposalsPage() {
     </Dialog>
   );
 
-  const indexOfLastProposal = currentPage * itemsPerPage;
-  const indexOfFirstProposal = indexOfLastProposal - itemsPerPage;
-  const currentProposals = proposals.slice(indexOfFirstProposal, indexOfLastProposal);
-  const totalPages = Math.ceil(proposals.length / itemsPerPage);
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   return (
     <PageLayout
       isAuthenticated={isAuthenticated}
@@ -195,6 +202,7 @@ export default function ProposalsPage() {
         currentPage={currentPage}
         itemsPerPage={itemsPerPage}
         onPageChange={handlePageChange}
+        isLoading={isLoading}
       />
     </PageLayout>
   );

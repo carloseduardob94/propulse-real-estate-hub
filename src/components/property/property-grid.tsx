@@ -4,6 +4,7 @@ import { PropertyCardWithSlider } from "@/components/ui/property-card-with-slide
 import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReusablePagination } from "@/components/ui/reusable-pagination";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface PropertyGridProps {
   properties: Property[];
@@ -11,6 +12,7 @@ interface PropertyGridProps {
   itemsPerPage: number;
   onPageChange: (page: number) => void;
   onResetFilters: () => void;
+  isLoading?: boolean;
 }
 
 export function PropertyGrid({
@@ -18,12 +20,34 @@ export function PropertyGrid({
   currentPage,
   itemsPerPage,
   onPageChange,
-  onResetFilters
+  onResetFilters,
+  isLoading = false
 }: PropertyGridProps) {
   const indexOfLastProperty = currentPage * itemsPerPage;
   const indexOfFirstProperty = indexOfLastProperty - itemsPerPage;
   const currentProperties = properties.slice(indexOfFirstProperty, indexOfLastProperty);
   const totalPages = Math.ceil(properties.length / itemsPerPage);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="rounded-lg overflow-hidden border border-gray-200">
+            <Skeleton className="w-full h-48" />
+            <div className="p-4 space-y-2">
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-4 w-2/3" />
+              <div className="pt-2 flex justify-between">
+                <Skeleton className="h-8 w-20" />
+                <Skeleton className="h-8 w-20" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   if (properties.length === 0) {
     return (

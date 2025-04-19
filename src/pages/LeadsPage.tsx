@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
@@ -6,14 +7,17 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { UserProfile } from "@/types/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Lead } from "@/types";
-import { MOCK_LEADS } from "@/data/mock-data";
 import { LeadList } from "@/components/leads/LeadList";
 import { PageLayout } from "@/components/layout/PageLayout";
+import { useToast } from "@/hooks/use-toast";
+import { LeadForm } from "@/components/ui/lead-form";
 
 export default function LeadsPage() {
-  const [leads, setLeads] = useState<Lead[]>(MOCK_LEADS);
+  const [leads, setLeads] = useState<Lead[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [user, setUser] = useState<UserProfile>({
     id: "",
     name: "", 
@@ -50,17 +54,63 @@ export default function LeadsPage() {
               avatar_url: profile?.avatar_url || null,
               company_name: profile?.company_name || null
             });
+
+            fetchLeads(userData.id);
           }
         } else {
           navigate('/login');
         }
       } catch (error) {
         console.error("Error fetching user profile:", error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar seu perfil",
+          variant: "destructive"
+        });
       }
     };
     
     getUserProfile();
-  }, [navigate]);
+  }, [navigate, toast]);
+
+  const fetchLeads = async (userId: string) => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('leads')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      
+      const typedLeads = data.map(lead => ({
+        id: lead.id,
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone || "",
+        message: lead.message || "",
+        budget: lead.budget || 0,
+        preferredLocation: lead.preferred_location || "",
+        propertyType: lead.property_type || [],
+        leadScore: lead.lead_score || 0,
+        status: lead.status as any || "new",
+        createdAt: lead.created_at,
+        updatedAt: lead.updated_at
+      }));
+      
+      setLeads(typedLeads);
+    } catch (error) {
+      console.error("Error fetching leads:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar seus leads",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   const handleLogout = async () => {
     try {
@@ -70,6 +120,11 @@ export default function LeadsPage() {
       navigate('/login');
     } catch (error: any) {
       console.error("Logout error:", error);
+      toast({
+        title: "Erro",
+        description: "Falha ao fazer logout",
+        variant: "destructive"
+      });
     }
   };
   
@@ -78,16 +133,40 @@ export default function LeadsPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const AddLeadForm = () => (
-    <div className="space-y-4 py-4">
-      <p className="text-center text-muted-foreground">
-        Formulário de cadastro de lead será implementado aqui.
-      </p>
-      <div className="flex justify-center">
-        <Button onClick={() => setIsDialogOpen(false)}>Fechar</Button>
-      </div>
-    </div>
-  );
+  const handleAddLead = async (data: any) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .insert({
+          user_id: user.id,
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          message: data.notes,
+          budget: data.budget ? parseFloat(data.budget) : null,
+          preferred_location: data.preferredLocation,
+          status: data.status,
+        });
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Sucesso!",
+        description: "Lead cadastrado com sucesso"
+      });
+      
+      // Reload leads
+      fetchLeads(user.id);
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("Error adding lead:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível cadastrar o lead",
+        variant: "destructive"
+      });
+    }
+  };
 
   const actionButton = (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -104,7 +183,7 @@ export default function LeadsPage() {
             Preencha as informações do lead para adicioná-lo ao sistema.
           </DialogDescription>
         </DialogHeader>
-        <AddLeadForm />
+        <LeadForm onSubmit={handleAddLead} />
       </DialogContent>
     </Dialog>
   );
@@ -123,6 +202,7 @@ export default function LeadsPage() {
         currentPage={currentPage}
         itemsPerPage={itemsPerPage}
         onPageChange={handlePageChange}
+        isLoading={isLoading}
       />
     </PageLayout>
   );

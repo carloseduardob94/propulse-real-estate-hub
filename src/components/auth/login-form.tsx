@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -40,16 +39,28 @@ export function LoginForm({ onSubmit, onRegisterClick, className }: LoginFormPro
     setIsSubmitting(true);
     
     try {
-      // Simulated delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      if (onSubmit) {
-        onSubmit(values);
-      }
-    } catch (error) {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+        options: {
+          persistSession: true // Enable session persistence
+        }
+      });
+
+      if (error) throw error;
+
+      // Successful login
+      toast({
+        title: "Login realizado com sucesso!",
+        description: "Bem-vindo de volta!",
+      });
+
+    } catch (error: any) {
       toast({
         title: "Erro",
-        description: "Ocorreu um erro ao fazer login. Verifique suas credenciais e tente novamente.",
+        description: error.message === "Invalid login credentials"
+          ? "Email ou senha incorretos"
+          : "Ocorreu um erro ao fazer login. Tente novamente.",
         variant: "destructive",
       });
     } finally {

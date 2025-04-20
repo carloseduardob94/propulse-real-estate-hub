@@ -41,7 +41,6 @@ export default function ProfilePage() {
           return;
         }
         
-        // Get profile data
         const { data: profile, error } = await supabase
           .from('profiles')
           .select('*')
@@ -69,7 +68,6 @@ export default function ProfilePage() {
             avatar_url: profile.avatar_url || '',
           });
         } else {
-          // Fallback if no profile exists
           setUser({
             id: authUser.id,
             name: authUser.user_metadata?.name || 'Usuário',
@@ -117,11 +115,25 @@ export default function ProfilePage() {
         throw new Error('Usuário não autenticado.');
       }
       
+      const generateSlug = (name: string) => {
+        return name.toLowerCase()
+          .replace(/\s+/g, '-')           // Replace spaces with -
+          .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+          .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+          .replace(/^-+/, '')             // Trim - from start of text
+          .replace(/-+$/, '');            // Trim - from end of text
+      };
+      
+      const slug = formData.company_name 
+        ? generateSlug(formData.company_name) 
+        : generateSlug(formData.name);
+      
       const updates = {
         id: user.id,
         name: formData.name,
         company_name: formData.company_name,
         avatar_url: formData.avatar_url,
+        slug: slug,
         updated_at: new Date().toISOString(),
       };
       

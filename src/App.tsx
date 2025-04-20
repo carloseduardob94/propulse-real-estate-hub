@@ -17,6 +17,7 @@ import ProposalsPage from "./pages/ProposalsPage";
 import PlansPage from "./pages/PlansPage";
 import AuthPage from "./pages/AuthPage";
 import ProfilePage from "./pages/ProfilePage";
+import PublicCatalog from "./pages/PublicCatalog";
 
 const queryClient = new QueryClient();
 
@@ -116,6 +117,8 @@ const App = () => {
                 session ? <ProfilePage /> : <Navigate to="/login" replace />
               } 
             />
+            {/* New public catalog route */}
+            <Route path="/catalogo/:slug" element={<PublicCatalog />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

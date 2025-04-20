@@ -21,29 +21,52 @@ export function ShareCatalogButton({ userSlug, variant = "outline", className }:
   const { toast } = useToast();
   
   const handleShare = async () => {
+    if (!userSlug) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível gerar o link do catálogo. Perfil incompleto.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     const baseUrl = window.location.origin;
     const catalogUrl = `${baseUrl}/catalogo/${userSlug}`;
     
     try {
-      await navigator.clipboard.writeText(catalogUrl);
-      setShowTooltip(true);
-      
-      // Show toast notification
-      toast({
-        title: "Link copiado!",
-        description: "Link do catálogo copiado para a área de transferência.",
-      });
-      
-      // Hide tooltip after 2 seconds
-      setTimeout(() => {
-        setShowTooltip(false);
-      }, 2000);
-      
+      if (navigator.share) {
+        // Mobile share API
+        await navigator.share({
+          title: "Catálogo de Imóveis",
+          text: "Confira meu catálogo de imóveis:",
+          url: catalogUrl,
+        });
+        
+        toast({
+          title: "Compartilhado!",
+          description: "Link do catálogo compartilhado com sucesso.",
+        });
+      } else {
+        // Clipboard fallback for desktop
+        await navigator.clipboard.writeText(catalogUrl);
+        setShowTooltip(true);
+        
+        // Show toast notification
+        toast({
+          title: "Link copiado!",
+          description: "Link do catálogo copiado para a área de transferência.",
+        });
+        
+        // Hide tooltip after 2 seconds
+        setTimeout(() => {
+          setShowTooltip(false);
+        }, 2000);
+      }
     } catch (err) {
-      console.error('Failed to copy: ', err);
+      console.error('Failed to share/copy: ', err);
       toast({
         title: "Erro",
-        description: "Não foi possível copiar o link. Tente novamente.",
+        description: "Não foi possível compartilhar o link. Tente novamente.",
         variant: "destructive",
       });
     }

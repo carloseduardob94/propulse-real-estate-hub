@@ -1,3 +1,4 @@
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -64,7 +65,8 @@ export function NavProfile({ user, onProfileClick, onLogout }: NavProfileProps) 
         <div className="hidden lg:block">
           <p className="text-sm font-medium text-gray-800 group-hover:text-propulse-700 transition-colors 
                         bg-gradient-to-r from-gray-800 to-propulse-700 bg-clip-text 
-                        hover:text-transparent hover:bg-clip-text hover:from-propulse-700 hover:to-propulse-900">
+                        hover:text-transparent hover:bg-clip-text hover:from-propulse-700 hover:to-propulse-900 
+                        hover:tracking-wider duration-300 ease-in-out">
             {user.name}
           </p>
           {user.plan && getPlanBadge(user.plan)}

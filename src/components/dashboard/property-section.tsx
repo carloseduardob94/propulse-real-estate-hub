@@ -25,7 +25,7 @@ export function PropertySection({ properties, isLoading, onNewProperty }: Proper
         <div className="rounded-full bg-muted/10 p-4 mb-4">
           <Inbox className="h-8 w-8 text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-semibold mb-2">Nenhum dado encontrado</h3>
+        <h3 className="text-lg font-semibold mb-2">Nenhum imóvel encontrado</h3>
         <p className="text-muted-foreground text-center mb-4">
           Cadastre seu primeiro imóvel para começar a gerenciar seu portfólio.
         </p>

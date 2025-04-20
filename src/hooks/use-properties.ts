@@ -12,12 +12,22 @@ export const useProperties = (userId: string) => {
   const fetchProperties = async (userId: string) => {
     setIsLoading(true);
     try {
+      // Only proceed if we have a valid userId
+      if (!userId) {
+        console.log("No userId provided, returning empty array");
+        setProperties([]);
+        return [];
+      }
+
+      console.log(`Fetching properties for user: ${userId}`);
       const { data, error } = await supabase
         .from('properties')
         .select('*')
         .eq('user_id', userId);
         
       if (error) throw error;
+      
+      console.log(`Found ${data?.length || 0} properties for user ${userId}`);
       
       const typedProperties = data.map(p => ({
         id: p.id,
@@ -57,6 +67,15 @@ export const useProperties = (userId: string) => {
 
   const addProperty = async (data: any) => {
     try {
+      if (!userId) {
+        toast({
+          title: "Erro ao cadastrar imóvel",
+          description: "Usuário não identificado. Faça login novamente.",
+          variant: "destructive",
+        });
+        return false;
+      }
+
       const dbData = {
         title: data.title,
         description: data.description,
@@ -101,6 +120,33 @@ export const useProperties = (userId: string) => {
 
   const updateProperty = async (id: string, data: any) => {
     try {
+      if (!userId) {
+        toast({
+          title: "Erro ao atualizar imóvel",
+          description: "Usuário não identificado. Faça login novamente.",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      // Add a check to ensure the property belongs to the current user
+      const { data: propertyCheck, error: checkError } = await supabase
+        .from('properties')
+        .select('user_id')
+        .eq('id', id)
+        .single();
+        
+      if (checkError) throw checkError;
+      
+      if (propertyCheck.user_id !== userId) {
+        toast({
+          title: "Acesso negado",
+          description: "Você não tem permissão para editar este imóvel.",
+          variant: "destructive",
+        });
+        return false;
+      }
+
       const dbData = {
         title: data.title,
         description: data.description,
@@ -122,7 +168,8 @@ export const useProperties = (userId: string) => {
       const { error } = await supabase
         .from('properties')
         .update(dbData)
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', userId); // Add extra check here too
 
       if (error) throw error;
 
@@ -145,10 +192,38 @@ export const useProperties = (userId: string) => {
 
   const deleteProperty = async (id: string) => {
     try {
+      if (!userId) {
+        toast({
+          title: "Erro ao excluir imóvel",
+          description: "Usuário não identificado. Faça login novamente.",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      // Check if property belongs to user before deletion
+      const { data: propertyCheck, error: checkError } = await supabase
+        .from('properties')
+        .select('user_id')
+        .eq('id', id)
+        .single();
+        
+      if (checkError) throw checkError;
+      
+      if (propertyCheck.user_id !== userId) {
+        toast({
+          title: "Acesso negado",
+          description: "Você não tem permissão para excluir este imóvel.",
+          variant: "destructive",
+        });
+        return false;
+      }
+
       const { error } = await supabase
         .from('properties')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', userId); // Double check with user_id
         
       if (error) throw error;
       

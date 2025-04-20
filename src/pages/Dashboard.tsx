@@ -71,32 +71,7 @@ const Dashboard = () => {
   const [showPropertyForm, setShowPropertyForm] = useState(false);
   const [showLeadForm, setShowLeadForm] = useState(false);
 
-  const { data: properties = [], isLoading: propertiesLoading } = useQuery({
-    queryKey: ['properties'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data.map(transformPropertyFromDB) as Property[];
-    }
-  });
-
-  const { data: leads = [], isLoading: leadsLoading } = useQuery({
-    queryKey: ['leads'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('leads')
-        .select('*')
-        .order('lead_score', { ascending: false });
-      
-      if (error) throw error;
-      return data.map(transformLeadFromDB) as Lead[];
-    }
-  });
-
+  // Use useEffect to ensure we have the user before querying for properties
   useEffect(() => {
     const getUserProfile = async () => {
       try {
@@ -133,7 +108,54 @@ const Dashboard = () => {
     
     getUserProfile();
   }, [navigate]);
-  
+
+  // Updated to use the current user ID when fetching properties
+  const { data: properties = [], isLoading: propertiesLoading } = useQuery({
+    queryKey: ['properties', user.id],
+    queryFn: async () => {
+      console.log("Fetching properties for user:", user.id);
+      
+      // Don't fetch if we don't have a user ID yet
+      if (!user.id) {
+        console.log("No user ID available, returning empty array");
+        return [];
+      }
+      
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching properties:", error);
+        throw error;
+      }
+      
+      console.log(`Found ${data.length} properties for user ${user.id}`);
+      return data.map(transformPropertyFromDB) as Property[];
+    },
+    enabled: !!user.id, // Only run query when user ID is available
+  });
+
+  // Similarly update the leads query
+  const { data: leads = [], isLoading: leadsLoading } = useQuery({
+    queryKey: ['leads', user.id],
+    queryFn: async () => {
+      if (!user.id) return [];
+      
+      const { data, error } = await supabase
+        .from('leads')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('lead_score', { ascending: false });
+      
+      if (error) throw error;
+      return data.map(transformLeadFromDB) as Lead[];
+    },
+    enabled: !!user.id,
+  });
+
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut();

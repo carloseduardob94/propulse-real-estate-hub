@@ -137,17 +137,21 @@ export default function ProfilePage() {
         updated_at: new Date().toISOString(),
       };
       
-      const { error } = await supabase
+      console.log('Updating profile with data:', updates);
+      
+      const { error, data } = await supabase
         .from('profiles')
-        .upsert(updates)
-        .select();
+        .upsert(updates);
       
       if (error) {
+        console.error('Error details:', error);
         throw error;
       }
       
+      console.log('Profile updated successfully:', data);
+      
       setUser(prev => ({
-        ...prev,
+        ...prev!,
         name: formData.name,
         company_name: formData.company_name,
         avatar_url: formData.avatar_url,
@@ -278,7 +282,7 @@ export default function ProfilePage() {
                     type="text" 
                     id="company_name" 
                     name="company_name"
-                    value={formData.company_name}
+                    value={formData.company_name || ''}
                     onChange={handleChange}
                   />
                 </div>
@@ -301,7 +305,7 @@ export default function ProfilePage() {
               <LogOut className="h-4 w-4 mr-2" />
               Sair
             </Button>
-            <Button onClick={handleSave} disabled={saving}>
+            <Button onClick={handleSave} disabled={saving || loading}>
               {saving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

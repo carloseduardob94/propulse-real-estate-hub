@@ -1,5 +1,5 @@
 
-import { Share2 } from "lucide-react";
+import { Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -34,35 +34,22 @@ export function ShareCatalogButton({ userSlug, variant = "outline", className }:
     const catalogUrl = `${baseUrl}/catalogo/${userSlug}`;
     
     try {
-      if (navigator.share) {
-        await navigator.share({
-          title: "Catálogo de Imóveis",
-          text: "Confira meu catálogo de imóveis:",
-          url: catalogUrl,
-        });
-        
-        toast({
-          title: "Compartilhado!",
-          description: "Link do catálogo compartilhado com sucesso.",
-        });
-      } else {
-        await navigator.clipboard.writeText(catalogUrl);
-        setShowTooltip(true);
-        
-        toast({
-          title: "Link copiado!",
-          description: "Link do catálogo copiado para a área de transferência.",
-        });
-        
-        setTimeout(() => {
-          setShowTooltip(false);
-        }, 2000);
-      }
+      await navigator.clipboard.writeText(catalogUrl);
+      setShowTooltip(true);
+      
+      toast({
+        title: "Link copiado!",
+        description: "Link do catálogo copiado para a área de transferência.",
+      });
+      
+      setTimeout(() => {
+        setShowTooltip(false);
+      }, 2000);
     } catch (err) {
-      console.error('Failed to share/copy: ', err);
+      console.error('Failed to copy: ', err);
       toast({
         title: "Erro",
-        description: "Não foi possível compartilhar o link. Tente novamente.",
+        description: "Não foi possível copiar o link. Verifique as permissões do navegador.",
         variant: "destructive",
       });
     }
@@ -77,8 +64,8 @@ export function ShareCatalogButton({ userSlug, variant = "outline", className }:
             className={`bg-white/10 text-white border-white/20 hover:bg-white/20 hover:text-white ${className}`}
             onClick={handleShare}
           >
-            <Share2 className="mr-2 h-4 w-4" />
-            Compartilhar
+            <Copy className="mr-2 h-4 w-4" />
+            Copiar Link
           </Button>
         </TooltipTrigger>
         <TooltipContent>

@@ -100,12 +100,15 @@ const AuthPage = () => {
               <AvatarUpload 
                 user={null}
                 url={avatarUrl}
+                optional={true}
                 onUploadComplete={(url) => {
                   setAvatarUrl(url);
-                  toast({
-                    title: "Avatar carregado com sucesso!",
-                    description: "Sua foto foi atualizada.",
-                  });
+                  if (url) {
+                    toast({
+                      title: "Avatar carregado com sucesso!",
+                      description: "Sua foto foi atualizada.",
+                    });
+                  }
                 }}
               />
               <RegisterForm 

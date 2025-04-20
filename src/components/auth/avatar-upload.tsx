@@ -10,10 +10,16 @@ import { Upload } from "lucide-react";
 interface AvatarUploadProps {
   user: User | null;
   url?: string | null;
-  onUploadComplete?: (url: string) => void;
+  onUploadComplete?: (url: string | null) => void;
+  optional?: boolean;
 }
 
-export function AvatarUpload({ user, url, onUploadComplete }: AvatarUploadProps) {
+export function AvatarUpload({ 
+  user, 
+  url, 
+  onUploadComplete, 
+  optional = true 
+}: AvatarUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(url || null);
   const { toast } = useToast();
@@ -23,12 +29,15 @@ export function AvatarUpload({ user, url, onUploadComplete }: AvatarUploadProps)
       setUploading(true);
       
       if (!event.target.files || event.target.files.length === 0) {
+        if (optional) {
+          onUploadComplete?.(null);
+          return;
+        }
         throw new Error('Você precisa selecionar uma imagem para fazer upload.');
       }
 
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
-      // Generate a unique file path using timestamp to avoid collisions
       const userId = user?.id || 'anonymous';
       const timestamp = new Date().getTime();
       const filePath = `${userId}-${timestamp}.${fileExt}`;
@@ -47,7 +56,7 @@ export function AvatarUpload({ user, url, onUploadComplete }: AvatarUploadProps)
       }
 
       // Get the public URL
-      const { data: urlData } = await supabase.storage
+      const { data: urlData } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
 

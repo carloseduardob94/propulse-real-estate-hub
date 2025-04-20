@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,13 +42,15 @@ export default function ProfilePage() {
           return;
         }
         
-        const { data: profile, error } = await supabase
+        // Check if profile exists first
+        let { data: profile, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', authUser.id)
-          .single();
+          .maybeSingle(); // Using maybeSingle instead of single to prevent errors
           
-        if (error && error.code !== 'PGRST116') {
+        if (error) {
+          console.error('Error fetching profile:', error);
           throw error;
         }
         
@@ -68,6 +71,7 @@ export default function ProfilePage() {
             avatar_url: profile.avatar_url || '',
           });
         } else {
+          // No profile found, set user with auth data
           setUser({
             id: authUser.id,
             name: authUser.user_metadata?.name || 'Usuário',
@@ -83,6 +87,26 @@ export default function ProfilePage() {
             company_name: '',
             avatar_url: '',
           });
+          
+          // Create initial profile
+          const initialProfile = {
+            id: authUser.id,
+            name: authUser.user_metadata?.name,
+            email: authUser.email,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+          
+          console.log('Creating initial profile:', initialProfile);
+          
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert(initialProfile);
+            
+          if (insertError) {
+            console.error('Error creating initial profile:', insertError);
+            // Continue anyway, we'll try to update on save
+          }
         }
       } catch (error: any) {
         console.error('Error loading user profile:', error.message);
@@ -139,16 +163,36 @@ export default function ProfilePage() {
       
       console.log('Updating profile with data:', updates);
       
-      const { error, data } = await supabase
+      // First check if the profile exists
+      const { data: existingProfile } = await supabase
         .from('profiles')
-        .upsert(updates);
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();
+        
+      let result;
+      
+      if (existingProfile) {
+        // Update existing profile
+        result = await supabase
+          .from('profiles')
+          .update(updates)
+          .eq('id', user.id);
+      } else {
+        // Insert new profile
+        result = await supabase
+          .from('profiles')
+          .insert(updates);
+      }
+      
+      const { error, data } = result;
       
       if (error) {
         console.error('Error details:', error);
         throw error;
       }
       
-      console.log('Profile updated successfully:', data);
+      console.log('Profile updated successfully');
       
       setUser(prev => ({
         ...prev!,
@@ -234,7 +278,9 @@ export default function ProfilePage() {
           
           <CardContent className="space-y-4">
             {loading ? (
-              <p>Carregando informações do perfil...</p>
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-8 w-8 animate-spin text-propulse-600" />
+              </div>
             ) : (
               <>
                 <div className="flex items-center space-x-4">
@@ -248,7 +294,7 @@ export default function ProfilePage() {
                     user={user as unknown as SupabaseUser}
                     onUploadComplete={(url) => {
                       setFormData(prev => ({ ...prev, avatar_url: url }));
-                      setUser(prev => ({ ...prev, avatar_url: url } as UserProfile));
+                      console.log("Avatar URL updated:", url);
                     }}
                   />
                 </div>

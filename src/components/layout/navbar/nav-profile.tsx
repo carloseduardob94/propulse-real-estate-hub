@@ -1,4 +1,3 @@
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -49,10 +48,10 @@ export function NavProfile({ user, onProfileClick, onLogout }: NavProfileProps) 
   return (
     <div className="hidden md:flex items-center gap-4">
       <div 
-        className="flex items-center gap-3 px-4 py-2 bg-white/50 backdrop-blur-sm rounded-full border shadow-sm hover:bg-gray-50 transition-colors cursor-pointer"
+        className="flex items-center gap-3 px-4 py-2 bg-propulse-50/50 backdrop-blur-sm rounded-full border shadow-sm hover:bg-propulse-100/50 transition-colors cursor-pointer group"
         onClick={onProfileClick}
       >
-        <Avatar className="h-10 w-10 md:h-12 md:w-12 border-2 border-propulse-100 object-cover">
+        <Avatar className="h-10 w-10 md:h-12 md:w-12 border-2 border-propulse-200 object-cover">
           <AvatarImage 
             src={user.avatar_url || (user.name ? `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random` : undefined)} 
             alt="User avatar" 
@@ -63,7 +62,11 @@ export function NavProfile({ user, onProfileClick, onLogout }: NavProfileProps) 
           </AvatarFallback>
         </Avatar>
         <div className="hidden lg:block">
-          <p className="text-sm font-medium">{user.name}</p>
+          <p className="text-sm font-medium text-gray-800 group-hover:text-propulse-700 transition-colors 
+                        bg-gradient-to-r from-gray-800 to-propulse-700 bg-clip-text 
+                        hover:text-transparent hover:bg-clip-text hover:from-propulse-700 hover:to-propulse-900">
+            {user.name}
+          </p>
           {user.plan && getPlanBadge(user.plan)}
         </div>
         <Button variant="ghost" size="icon" className="ml-1" onClick={(e) => {

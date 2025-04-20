@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { useToast } from "@/hooks/use-toast";
@@ -15,7 +14,6 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { PropertySection } from "@/components/dashboard/property-section";
 import { LeadSection } from "@/components/dashboard/lead-section";
-import { QuickActions } from "@/components/dashboard/quick-actions";
 import { PremiumPromotion } from "@/components/dashboard/premium-promotion";
 import { useQuery } from "@tanstack/react-query";
 
@@ -295,8 +293,6 @@ const Dashboard = () => {
             />
           </TabsContent>
         </Tabs>
-        
-        <QuickActions />
         
         <PremiumPromotion show={user.plan === 'free'} />
 

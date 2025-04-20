@@ -92,6 +92,51 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
     { href: "/plans", label: "Planos", icon: BadgeDollarSign },
   ];
 
+  const renderAuthButtons = () => {
+    if (isAuthenticated && user) {
+      return (
+        <div className="hidden md:flex items-center gap-4">
+          <div 
+            className="flex items-center gap-3 px-4 py-2 bg-white/50 backdrop-blur-sm rounded-full border shadow-sm hover:bg-gray-50 transition-colors cursor-pointer"
+            onClick={handleProfileClick}
+          >
+            <Avatar className="h-10 w-10 md:h-12 md:w-12 border-2 border-propulse-100 object-cover">
+              <AvatarImage 
+                src={user.avatar_url || (user.name ? `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random` : undefined)} 
+                alt="User avatar" 
+                className="object-cover object-center rounded-full"
+              />
+              <AvatarFallback className="bg-propulse-100 text-propulse-700 text-lg font-semibold">
+                {getUserInitials(user.name)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="hidden lg:block">
+              <p className="text-sm font-medium">{user.name}</p>
+              {user.plan && getPlanBadge(user.plan)}
+            </div>
+            <Button variant="ghost" size="icon" className="ml-1" onClick={(e) => {
+              e.stopPropagation();
+              handleLogout();
+            }}>
+              <LogOut className="h-5 w-5 text-gray-500 hover:text-red-500 transition-colors" />
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="hidden md:flex items-center gap-4">
+        <Button variant="ghost" asChild>
+          <Link to="/login">Entrar</Link>
+        </Button>
+        <Button asChild>
+          <Link to="/login">Cadastre-se</Link>
+        </Button>
+      </div>
+    );
+  };
+
   const renderMobileMenu = () => (
     <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
       <SheetTrigger asChild>
@@ -132,9 +177,13 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
               <div className="space-y-4">
                 <div className="flex items-center gap-4 px-3">
                   <button onClick={handleProfileClick} className="flex items-center gap-3 w-full">
-                    <Avatar className="border-2 border-propulse-200">
-                      <AvatarImage src={user.avatar_url || (user.name ? `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random` : undefined)} />
-                      <AvatarFallback className="bg-propulse-100 text-propulse-700">{getUserInitials(user.name)}</AvatarFallback>
+                    <Avatar className="h-10 w-10 border-2 border-propulse-200">
+                      <AvatarImage 
+                        src={user?.avatar_url || (user?.name ? `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random` : undefined)} 
+                        alt="User avatar" 
+                        className="object-cover object-center rounded-full"
+                      />
+                      <AvatarFallback className="bg-propulse-100 text-propulse-700">{getUserInitials(user?.name)}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium">{user.name}</p>
@@ -197,47 +246,6 @@ export function Navbar({ isAuthenticated = false, user, onLogout }: NavbarProps)
       })}
     </div>
   );
-
-  const renderAuthButtons = () => {
-    if (isAuthenticated && user) {
-      return (
-        <div className="hidden md:flex items-center gap-4">
-          <div 
-            className="flex items-center gap-3 px-4 py-2 bg-white/50 backdrop-blur-sm rounded-full border shadow-sm hover:bg-gray-50 transition-colors cursor-pointer"
-            onClick={handleProfileClick}
-          >
-            <Avatar className="h-8 w-8 border-2 border-propulse-100">
-              <AvatarImage src={user.avatar_url || (user.name ? `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random` : undefined)} />
-              <AvatarFallback className="bg-propulse-100 text-propulse-700">
-                {getUserInitials(user.name)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="hidden lg:block">
-              <p className="text-sm font-medium">{user.name}</p>
-              {user.plan && getPlanBadge(user.plan)}
-            </div>
-            <Button variant="ghost" size="icon" className="ml-1" onClick={(e) => {
-              e.stopPropagation();
-              handleLogout();
-            }}>
-              <LogOut className="h-5 w-5 text-gray-500 hover:text-red-500 transition-colors" />
-            </Button>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="hidden md:flex items-center gap-4">
-        <Button variant="ghost" asChild>
-          <Link to="/login">Entrar</Link>
-        </Button>
-        <Button asChild>
-          <Link to="/login">Cadastre-se</Link>
-        </Button>
-      </div>
-    );
-  };
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b">

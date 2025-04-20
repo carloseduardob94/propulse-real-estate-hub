@@ -1,19 +1,29 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { PropertyGrid } from "@/components/property/property-grid";
-import { supabase } from "@/integrations/supabase/client";
-import { Property } from "@/types";
 import { PropertyFilterProvider } from "@/components/property/property-filter-context";
 import { PropertyFilters } from "@/components/property/property-filters";
-import { usePropertyFilters } from "@/components/property/property-filter-context";
+import { PropertyGrid } from "@/components/property/property-grid";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Property } from "@/types";
+import { usePropertyFilters } from "@/components/property/property-filter-context";
 
-function PublicCatalogContent({ properties, isLoading, profileData }: { 
-  properties: Property[], 
-  isLoading: boolean,
-  profileData: any
+interface ProfileData {
+  id: string;
+  name: string | null;
+  company_name: string | null;
+}
+
+function PublicCatalogContent({ 
+  properties, 
+  isLoading, 
+  profileData 
+}: { 
+  properties: Property[];
+  isLoading: boolean;
+  profileData: ProfileData;
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const {
@@ -75,13 +85,12 @@ export default function PublicCatalog() {
   const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [profileData, setProfileData] = useState<any>(null);
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
 
   useEffect(() => {
     const fetchProfileBySlug = async () => {
       setIsLoading(true);
       try {
-        // First, find the user profile that matches this slug
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -90,14 +99,12 @@ export default function PublicCatalog() {
         
         if (profileError || !profile) {
           console.error("Profile not found:", profileError);
-          // Redirect to 404 if slug doesn't exist
           navigate('/not-found');
           return;
         }
 
         setProfileData(profile);
 
-        // Then fetch properties for that user
         const { data: propertiesData, error: propertiesError } = await supabase
           .from('properties')
           .select('*')
@@ -153,7 +160,7 @@ export default function PublicCatalog() {
   }
 
   if (!profileData) {
-    return null; // This should rarely happen as we navigate to not-found in case of errors
+    return null;
   }
 
   const profileName = profileData.company_name || profileData.name || "Catálogo de Imóveis";

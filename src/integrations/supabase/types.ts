@@ -72,6 +72,7 @@ export type Database = {
           id: string
           name: string | null
           plan: string | null
+          slug: string | null
           terms_accepted: boolean | null
           terms_accepted_at: string | null
           updated_at: string
@@ -84,6 +85,7 @@ export type Database = {
           id: string
           name?: string | null
           plan?: string | null
+          slug?: string | null
           terms_accepted?: boolean | null
           terms_accepted_at?: string | null
           updated_at?: string
@@ -96,6 +98,7 @@ export type Database = {
           id?: string
           name?: string | null
           plan?: string | null
+          slug?: string | null
           terms_accepted?: boolean | null
           terms_accepted_at?: string | null
           updated_at?: string

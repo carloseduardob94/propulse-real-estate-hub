@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -26,10 +25,8 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Configure the Supabase client to properly persist sessions
     const initializeAuth = async () => {
       try {
-        // Set up the auth state change listener first
         const {
           data: { subscription },
         } = supabase.auth.onAuthStateChange((_event, newSession) => {
@@ -37,13 +34,11 @@ const App = () => {
           setSession(newSession);
         });
 
-        // Then get the initial session
         const { data } = await supabase.auth.getSession();
         console.log("Initial session:", !!data.session);
         setSession(data.session);
         
         if (data.session) {
-          // Ensure session is persisted
           await supabase.auth.setSession({
             access_token: data.session.access_token,
             refresh_token: data.session.refresh_token,
@@ -63,7 +58,6 @@ const App = () => {
   }, []);
 
   if (isLoading) {
-    // You could add a loading spinner here if desired
     return null;
   }
 
@@ -117,7 +111,6 @@ const App = () => {
                 session ? <ProfilePage /> : <Navigate to="/login" replace />
               } 
             />
-            {/* New public catalog route */}
             <Route path="/catalogo/:slug" element={<PublicCatalog />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

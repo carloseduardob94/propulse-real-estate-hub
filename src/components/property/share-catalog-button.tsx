@@ -35,7 +35,6 @@ export function ShareCatalogButton({ userSlug, variant = "outline", className }:
     
     try {
       if (navigator.share) {
-        // Mobile share API
         await navigator.share({
           title: "Catálogo de Imóveis",
           text: "Confira meu catálogo de imóveis:",
@@ -47,17 +46,14 @@ export function ShareCatalogButton({ userSlug, variant = "outline", className }:
           description: "Link do catálogo compartilhado com sucesso.",
         });
       } else {
-        // Clipboard fallback for desktop
         await navigator.clipboard.writeText(catalogUrl);
         setShowTooltip(true);
         
-        // Show toast notification
         toast({
           title: "Link copiado!",
           description: "Link do catálogo copiado para a área de transferência.",
         });
         
-        // Hide tooltip after 2 seconds
         setTimeout(() => {
           setShowTooltip(false);
         }, 2000);

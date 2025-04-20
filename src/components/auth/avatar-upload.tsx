@@ -15,6 +15,7 @@ interface AvatarUploadProps {
 
 export function AvatarUpload({ user, url, onUploadComplete }: AvatarUploadProps) {
   const [uploading, setUploading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(url || null);
   const { toast } = useToast();
 
   const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,18 +33,8 @@ export function AvatarUpload({ user, url, onUploadComplete }: AvatarUploadProps)
       const timestamp = new Date().getTime();
       const filePath = `${userId}-${timestamp}.${fileExt}`;
 
-      // Make sure storage bucket exists
-      const { data: bucketData } = await supabase.storage.getBucket('avatars');
-      if (!bucketData) {
-        console.log("Creating avatars bucket...");
-        await supabase.storage.createBucket('avatars', {
-          public: true,
-          fileSizeLimit: 1024 * 1024 * 2 // 2MB
-        });
-      }
-
       // Upload the file
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError, data } = await supabase.storage
         .from('avatars')
         .upload(filePath, file, {
           upsert: true,
@@ -56,12 +47,13 @@ export function AvatarUpload({ user, url, onUploadComplete }: AvatarUploadProps)
       }
 
       // Get the public URL
-      const { data } = await supabase.storage
+      const { data: urlData } = await supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
 
-      if (data?.publicUrl) {
-        onUploadComplete?.(data.publicUrl);
+      if (urlData?.publicUrl) {
+        setAvatarUrl(urlData.publicUrl);
+        onUploadComplete?.(urlData.publicUrl);
         toast({
           title: "Avatar atualizado!",
           description: "Sua foto foi atualizada com sucesso.",
@@ -82,7 +74,7 @@ export function AvatarUpload({ user, url, onUploadComplete }: AvatarUploadProps)
   return (
     <div className="flex flex-col items-center gap-4">
       <Avatar className="h-24 w-24 border-4 border-propulse-100">
-        <AvatarImage src={url ?? undefined} />
+        <AvatarImage src={avatarUrl ?? undefined} />
         <AvatarFallback className="bg-propulse-100 text-propulse-700 text-xl">
           {user?.email?.charAt(0).toUpperCase() || '?'}
         </AvatarFallback>

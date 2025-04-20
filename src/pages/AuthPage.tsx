@@ -13,9 +13,6 @@ const AuthPage = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  // We don't need the useEffect for redirection check here anymore
-  // as the routing in App.tsx will handle this redirection
   
   const handleLogin = async (data: any) => {
     try {
@@ -61,8 +58,6 @@ const AuthPage = () => {
 
       if (error) throw error;
       
-      // Don't redirect automatically after registration
-      // Just show a success message and let the user login
       toast({
         title: "Cadastro realizado com sucesso!",
         description: "Você já pode fazer login com suas credenciais.",

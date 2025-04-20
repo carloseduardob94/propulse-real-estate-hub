@@ -63,10 +63,10 @@ export function NavProfile({ user, onProfileClick, onLogout }: NavProfileProps) 
           </AvatarFallback>
         </Avatar>
         <div className="hidden lg:block">
-          <p className="text-sm font-medium text-gray-800 group-hover:text-propulse-700 transition-colors 
-                        bg-gradient-to-r from-gray-800 to-propulse-700 bg-clip-text 
-                        hover:text-transparent hover:bg-clip-text hover:from-propulse-700 hover:to-propulse-900 
-                        hover:tracking-wider duration-300 ease-in-out">
+          <p className="text-sm font-bold text-propulse-700 group-hover:text-propulse-800 transition-all
+                        bg-gradient-to-r from-propulse-600 to-propulse-800 bg-clip-text text-transparent
+                        border-b border-transparent group-hover:border-propulse-500 pb-0.5
+                        transform group-hover:scale-105 origin-left duration-300">
             {user.name}
           </p>
           {user.plan && getPlanBadge(user.plan)}

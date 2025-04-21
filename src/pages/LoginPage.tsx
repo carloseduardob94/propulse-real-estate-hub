@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { LoginForm } from "@/components/auth/login-form";
@@ -103,7 +104,7 @@ const LoginPage = () => {
 
           <div className="flex flex-col items-center space-y-2 bg-white/80 backdrop-blur-lg w-full p-8 rounded-2xl shadow-xl">
             <div className="flex justify-center w-full">
-              <Logo className="mx-auto" />
+              <Logo className="mx-auto" iconOnly={!isLogin} />
             </div>
             
             <h1 className="text-2xl font-bold text-gray-900 text-center">
@@ -149,3 +150,4 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+

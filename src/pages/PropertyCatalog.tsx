@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
@@ -89,6 +88,16 @@ export default function PropertyCatalog() {
 
   const { properties, isLoading, fetchProperties } = useProperties(user.id);
 
+  const [userProfile, setUserProfile] = useState<{
+    id: string;
+    name: string | null;
+    slug: string | null;
+  }>({
+    id: "",
+    name: "",
+    slug: null
+  });
+
   useEffect(() => {
     const getUserProfile = async () => {
       try {
@@ -112,6 +121,12 @@ export default function PropertyCatalog() {
               plan: (profile?.plan as "free" | "monthly" | "yearly") || "free",
               avatar_url: profile?.avatar_url || null,
               company_name: profile?.company_name || null
+            });
+
+            setUserProfile({
+              id: userData.id,
+              name: profile?.name || userData.user_metadata?.name || "Usuário",
+              slug: profile?.slug || null
             });
 
             fetchProperties(userData.id);
@@ -188,16 +203,6 @@ export default function PropertyCatalog() {
     </Dialog>
   );
 
-  const getUserSlug = (profile: UserProfile) => {
-    const baseSlug = profile.company_name || profile.name || profile.id;
-    return baseSlug.toLowerCase()
-      .replace(/\s+/g, '-')           // Replace spaces with -
-      .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
-      .replace(/\-\-+/g, '-')         // Replace multiple - with single -
-      .replace(/^-+/, '')             // Trim - from start of text
-      .replace(/-+$/, '');            // Trim - from end of text
-  };
-
   return (
     <PageLayout
       isAuthenticated={isAuthenticated}
@@ -210,7 +215,7 @@ export default function PropertyCatalog() {
       <PropertyCatalogHeader 
         showFilters={showFilters}
         onToggleFilters={toggleFilters}
-        userSlug={getUserSlug(user)}
+        userSlug={userProfile.slug || ""}
       />
       
       <PropertyFilterProvider properties={properties}>

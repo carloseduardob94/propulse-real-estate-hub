@@ -30,7 +30,8 @@ export function ShareCatalogButton({ userSlug, variant = "outline", className }:
       return;
     }
     
-    const baseUrl = window.location.origin;
+    // Get the base URL without any preview or development-specific parts
+    const baseUrl = window.location.origin.replace(/id-preview--[^.]+\./, '');
     const catalogUrl = `${baseUrl}/catalogo/${userSlug}`;
     
     try {

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
@@ -18,6 +18,11 @@ export function PropertyImageGallery({
   onClose 
 }: PropertyImageGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(initialImageIndex);
+  
+  // Reset current index when initialImageIndex changes
+  useEffect(() => {
+    setCurrentIndex(initialImageIndex);
+  }, [initialImageIndex]);
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % images.length);
@@ -41,11 +46,14 @@ export function PropertyImageGallery({
     }
   };
 
+  if (!isOpen) return null;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
         className="max-w-[95vw] max-h-[95vh] p-0 gap-0 bg-black/95 border-none"
         onKeyDown={handleKeyDown}
+        tabIndex={0}
       >
         <div className="relative h-full flex flex-col">
           {/* Close button */}
@@ -91,7 +99,7 @@ export function PropertyImageGallery({
 
           {/* Thumbnails */}
           {images.length > 1 && (
-            <div className="flex justify-center gap-2 p-4 bg-black/80">
+            <div className="flex justify-center gap-2 p-4 bg-black/80 overflow-x-auto">
               {images.map((image, index) => (
                 <button
                   key={index}

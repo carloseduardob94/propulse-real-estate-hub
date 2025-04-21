@@ -125,6 +125,12 @@ export default function PublicPropertyDetails() {
     }
   };
 
+  const openGallery = (index: number) => {
+    console.log("Opening gallery with index:", index);
+    setInitialImageIndex(index);
+    setIsGalleryOpen(true);
+  };
+
   const formatStatusText = (status: string) => {
     switch (status) {
       case 'forSale': return 'Venda';
@@ -216,10 +222,7 @@ export default function PublicPropertyDetails() {
                   src={property.images[currentImageIndex]}
                   alt={`${property.title} - Image ${currentImageIndex + 1} of ${property.images.length}`}
                   className="w-full h-full object-cover transition-all duration-500 hover:scale-105 cursor-pointer"
-                  onClick={() => {
-                    setInitialImageIndex(currentImageIndex);
-                    setIsGalleryOpen(true);
-                  }}
+                  onClick={() => openGallery(currentImageIndex)}
                 />
               ) : (
                 <div className="flex items-center justify-center h-full bg-gray-100 text-gray-400">
@@ -282,8 +285,7 @@ export default function PublicPropertyDetails() {
                     }`}
                     onClick={() => {
                       setCurrentImageIndex(idx);
-                      setInitialImageIndex(idx);
-                      setIsGalleryOpen(true);
+                      openGallery(idx);
                     }}
                   >
                     <img 
@@ -443,6 +445,15 @@ export default function PublicPropertyDetails() {
           </div>
         </div>
       </main>
+      
+      {property.images.length > 0 && (
+        <PropertyImageGallery
+          images={property.images}
+          initialImageIndex={initialImageIndex}
+          isOpen={isGalleryOpen}
+          onClose={() => setIsGalleryOpen(false)}
+        />
+      )}
       
       <footer className="bg-white border-t py-6 mt-12 animate-fade-in">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">

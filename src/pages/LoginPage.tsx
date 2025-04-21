@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { LoginForm } from "@/components/auth/login-form";
@@ -83,23 +82,31 @@ const LoginPage = () => {
     }
   };
 
+  console.log("Rendering LoginPage component");
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-propulse-50 via-white to-propulse-50">
       <div className="flex-1 flex flex-col items-center justify-center p-4">
         <div className="w-full max-w-lg flex flex-col items-center space-y-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="self-start"
-            onClick={() => navigate('/')}
-            aria-label="Voltar para a página inicial"
-          >
-            <ArrowLeft className="h-5 w-5 text-propulse-600" />
-          </Button>
+          <div className="w-full flex justify-start mb-2">
+            <Button
+              variant="propulse-outline"
+              size="sm"
+              onClick={() => navigate('/')}
+              aria-label="Voltar para a página inicial"
+              className="z-10 shadow-sm"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Voltar
+            </Button>
+          </div>
 
           <div className="flex flex-col items-center space-y-2 bg-white/80 backdrop-blur-lg w-full p-8 rounded-2xl shadow-xl">
-            <Logo className="mx-auto" />
-            <h1 className="text-2xl font-bold text-gray-900">
+            <div className="flex justify-center w-full">
+              <Logo className="mx-auto" />
+            </div>
+            
+            <h1 className="text-2xl font-bold text-gray-900 text-center">
               {isLogin ? "Bem-vindo de volta!" : "Criar nova conta"}
             </h1>
             <p className="text-gray-600 text-center max-w-xs">
@@ -142,4 +149,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-

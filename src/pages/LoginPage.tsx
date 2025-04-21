@@ -14,12 +14,24 @@ const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [session, setSession] = useState(supabase.auth.getSession());
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate('/dashboard');
-    });
+    const checkSession = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        
+        if (data.session) {
+          navigate('/dashboard');
+        }
+      } catch (error) {
+        console.error("Session check error:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkSession();
 
     const {
       data: { subscription },
@@ -32,6 +44,7 @@ const LoginPage = () => {
 
   const handleLogin = async (data: any) => {
     try {
+      setIsLoading(true);
       const { error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
@@ -51,17 +64,21 @@ const LoginPage = () => {
           : "Ocorreu um erro ao fazer login",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleRegister = async (data: any) => {
     try {
+      setIsLoading(true);
       const { error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
           data: {
             name: data.name,
+            company_name: data.companyName,
           },
         },
       });
@@ -75,17 +92,34 @@ const LoginPage = () => {
       
       setIsLogin(true);
     } catch (error: any) {
+      let errorMessage = error.message;
+      
+      // Handling specific error messages for better user experience
+      if (error.message.includes("User already registered")) {
+        errorMessage = "Este email já está cadastrado. Tente fazer login.";
+      }
+      
       toast({
         title: "Erro no cadastro",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[linear-gradient(108deg,_#f0f5ff_20%,_#fbed96_100%)]">
+        <div className="animate-pulse text-propulse-600 font-semibold">Carregando...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen w-full flex flex-col justify-center items-center relative bg-[linear-gradient(108deg,_#f0f5ff_20%,_#fbed96_100%)]">
-      {/* Botão "Início" absoluto e melhor posicionado */}
+      {/* Botão "Início" absoluto */}
       <div className="absolute top-8 left-8 z-20">
         <Button
           variant="propulse"
@@ -129,6 +163,7 @@ const LoginPage = () => {
               <LoginForm 
                 onSubmit={handleLogin} 
                 onRegisterClick={() => setIsLogin(false)}
+                isLoading={isLoading}
                 className="bg-transparent shadow-none border-none"
               />
             ) : (
@@ -142,6 +177,7 @@ const LoginPage = () => {
                 <RegisterForm 
                   onSubmit={handleRegister} 
                   onLoginClick={() => setIsLogin(true)}
+                  isLoading={isLoading}
                   className="bg-transparent shadow-none border-none"
                 />
               </>

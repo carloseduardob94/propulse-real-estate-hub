@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -7,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
@@ -26,12 +27,12 @@ type FormValues = z.infer<typeof formSchema>;
 interface RegisterFormProps {
   onSubmit?: (data: FormValues) => void;
   onLoginClick?: () => void;
+  isLoading?: boolean;
   className?: string;
 }
 
-export function RegisterForm({ onSubmit, onLoginClick, className }: RegisterFormProps) {
+export function RegisterForm({ onSubmit, onLoginClick, isLoading = false, className }: RegisterFormProps) {
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -48,20 +49,16 @@ export function RegisterForm({ onSubmit, onLoginClick, className }: RegisterForm
   });
 
   const handleSubmit = async (values: FormValues) => {
-    setIsSubmitting(true);
-    
     try {
       if (onSubmit) {
         await onSubmit(values);
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Erro no Cadastro",
-        description: "Não foi possível realizar o cadastro. Por favor, tente novamente.",
+        description: error.message || "Não foi possível realizar o cadastro. Por favor, tente novamente.",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -80,6 +77,7 @@ export function RegisterForm({ onSubmit, onLoginClick, className }: RegisterForm
             <Input
               id="name"
               placeholder="Seu nome completo"
+              disabled={isLoading}
               {...form.register("name")}
             />
             {form.formState.errors.name && (
@@ -93,6 +91,7 @@ export function RegisterForm({ onSubmit, onLoginClick, className }: RegisterForm
               id="email"
               type="email"
               placeholder="corretor@example.com"
+              disabled={isLoading}
               {...form.register("email")}
             />
             {form.formState.errors.email && (
@@ -105,6 +104,7 @@ export function RegisterForm({ onSubmit, onLoginClick, className }: RegisterForm
             <Input
               id="companyName"
               placeholder="Nome da sua imobiliária"
+              disabled={isLoading}
               {...form.register("companyName")}
             />
           </div>
@@ -116,12 +116,14 @@ export function RegisterForm({ onSubmit, onLoginClick, className }: RegisterForm
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
+                disabled={isLoading}
                 {...form.register("password")}
               />
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
+                disabled={isLoading}
                 className="absolute right-0 top-0 h-full px-3 py-2 text-muted-foreground"
                 onClick={() => setShowPassword(!showPassword)}
               >
@@ -144,12 +146,14 @@ export function RegisterForm({ onSubmit, onLoginClick, className }: RegisterForm
                 id="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="••••••••"
+                disabled={isLoading}
                 {...form.register("confirmPassword")}
               />
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
+                disabled={isLoading}
                 className="absolute right-0 top-0 h-full px-3 py-2 text-muted-foreground"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
@@ -171,6 +175,7 @@ export function RegisterForm({ onSubmit, onLoginClick, className }: RegisterForm
               id="terms"
               checked={acceptedTerms}
               onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
+              disabled={isLoading}
             />
             <Label
               htmlFor="terms"
@@ -181,10 +186,17 @@ export function RegisterForm({ onSubmit, onLoginClick, className }: RegisterForm
           </div>
           <Button 
             type="submit" 
-            disabled={isSubmitting || !acceptedTerms} 
+            disabled={isLoading || !acceptedTerms} 
             className="w-full"
           >
-            {isSubmitting ? "Cadastrando..." : "Cadastrar"}
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                Cadastrando...
+              </>
+            ) : (
+              "Cadastrar"
+            )}
           </Button>
           <div className="text-center text-sm">
             Já tem uma conta?{" "}
@@ -192,6 +204,7 @@ export function RegisterForm({ onSubmit, onLoginClick, className }: RegisterForm
               variant="link" 
               className="p-0 h-auto"
               type="button"
+              disabled={isLoading}
               onClick={onLoginClick}
             >
               Faça login

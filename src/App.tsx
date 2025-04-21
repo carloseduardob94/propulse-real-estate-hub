@@ -28,6 +28,7 @@ const App = () => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        // Set up auth state listener FIRST
         const {
           data: { subscription },
         } = supabase.auth.onAuthStateChange((_event, newSession) => {
@@ -35,10 +36,12 @@ const App = () => {
           setSession(newSession);
         });
 
+        // THEN check for existing session
         const { data } = await supabase.auth.getSession();
         console.log("Initial session:", !!data.session);
         setSession(data.session);
         
+        // Only set the session if there is one to prevent unnecessary token refresh
         if (data.session) {
           await supabase.auth.setSession({
             access_token: data.session.access_token,
@@ -59,7 +62,11 @@ const App = () => {
   }, []);
 
   if (isLoading) {
-    return null;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-propulse-50 to-gray-100">
+        <div className="animate-pulse text-propulse-600 font-semibold">Carregando...</div>
+      </div>
+    );
   }
 
   return (
@@ -84,11 +91,15 @@ const App = () => {
             />
             <Route 
               path="/properties" 
-              element={<PropertyCatalog />} 
+              element={
+                session ? <PropertyCatalog /> : <Navigate to="/login" replace />
+              } 
             />
             <Route 
               path="/properties/:id" 
-              element={<PropertyDetails />} 
+              element={
+                session ? <PropertyDetails /> : <Navigate to="/login" replace />
+              } 
             />
             <Route 
               path="/leads" 

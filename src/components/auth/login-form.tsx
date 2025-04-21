@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email({ message: "E-mail inválido" }),
@@ -20,12 +20,12 @@ type FormValues = z.infer<typeof formSchema>;
 interface LoginFormProps {
   onSubmit?: (data: FormValues) => void;
   onRegisterClick?: () => void;
+  isLoading?: boolean;
   className?: string;
 }
 
-export function LoginForm({ onSubmit, onRegisterClick, className }: LoginFormProps) {
+export function LoginForm({ onSubmit, onRegisterClick, isLoading = false, className }: LoginFormProps) {
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<FormValues>({
@@ -37,8 +37,6 @@ export function LoginForm({ onSubmit, onRegisterClick, className }: LoginFormPro
   });
 
   const handleSubmit = async (values: FormValues) => {
-    setIsSubmitting(true);
-    
     try {
       if (onSubmit) {
         await onSubmit(values);
@@ -47,13 +45,9 @@ export function LoginForm({ onSubmit, onRegisterClick, className }: LoginFormPro
       console.error("Form submission error:", error);
       toast({
         title: "Erro no Login",
-        description: error.message === "Invalid login credentials"
-          ? "Email ou senha incorretos"
-          : "Ocorreu um erro ao fazer login. Tente novamente.",
+        description: error.message || "Ocorreu um erro ao fazer login. Tente novamente.",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -73,6 +67,7 @@ export function LoginForm({ onSubmit, onRegisterClick, className }: LoginFormPro
               id="email"
               type="email"
               placeholder="corretor@example.com"
+              disabled={isLoading}
               {...form.register("email")}
             />
             {form.formState.errors.email && (
@@ -86,6 +81,7 @@ export function LoginForm({ onSubmit, onRegisterClick, className }: LoginFormPro
                 variant="link" 
                 className="p-0 h-auto text-xs"
                 type="button"
+                disabled={isLoading}
               >
                 Esqueceu sua senha?
               </Button>
@@ -95,12 +91,14 @@ export function LoginForm({ onSubmit, onRegisterClick, className }: LoginFormPro
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
+                disabled={isLoading}
                 {...form.register("password")}
               />
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
+                disabled={isLoading}
                 className="absolute right-0 top-0 h-full px-3 py-2 text-muted-foreground"
                 onClick={() => setShowPassword(!showPassword)}
               >
@@ -117,8 +115,15 @@ export function LoginForm({ onSubmit, onRegisterClick, className }: LoginFormPro
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? "Entrando..." : "Entrar"}
+          <Button type="submit" disabled={isLoading} className="w-full">
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                Entrando...
+              </>
+            ) : (
+              "Entrar"
+            )}
           </Button>
           <div className="text-center text-sm">
             Não tem uma conta?{" "}
@@ -126,6 +131,7 @@ export function LoginForm({ onSubmit, onRegisterClick, className }: LoginFormPro
               variant="link" 
               className="p-0 h-auto"
               type="button"
+              disabled={isLoading}
               onClick={onRegisterClick}
             >
               Cadastre-se

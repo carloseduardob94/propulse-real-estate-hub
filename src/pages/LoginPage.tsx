@@ -7,6 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Logo } from "@/components/brand/logo";
 import { AvatarUpload } from "@/components/auth/avatar-upload";
 import { supabase } from "@/integrations/supabase/client";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -83,40 +85,52 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-propulse-50 via-white to-propulse-50">
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="bg-white/80 backdrop-blur-lg w-full max-w-lg p-8 rounded-2xl shadow-xl space-y-8">
-          <div className="text-center space-y-2">
+      <div className="flex-1 flex flex-col items-center justify-center p-4">
+        <div className="w-full max-w-lg flex flex-col items-center space-y-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="self-start"
+            onClick={() => navigate('/')}
+            aria-label="Voltar para a página inicial"
+          >
+            <ArrowLeft className="h-5 w-5 text-propulse-600" />
+          </Button>
+
+          <div className="flex flex-col items-center space-y-2 bg-white/80 backdrop-blur-lg w-full p-8 rounded-2xl shadow-xl">
             <Logo className="mx-auto" />
             <h1 className="text-2xl font-bold text-gray-900">
               {isLogin ? "Bem-vindo de volta!" : "Criar nova conta"}
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-center max-w-xs">
               {isLogin 
                 ? "Entre com suas credenciais para acessar sua conta" 
                 : "Preencha os dados abaixo para criar sua conta"}
             </p>
-          </div>
 
-          {isLogin ? (
-            <LoginForm 
-              onSubmit={handleLogin} 
-              onRegisterClick={() => setIsLogin(false)} 
-            />
-          ) : (
-            <>
-              <AvatarUpload 
-                user={null}
-                onUploadComplete={(url) => {
-                  console.log('Avatar URL:', url);
-                  // Será usado quando implementarmos o perfil do usuário
-                }}
-              />
-              <RegisterForm 
-                onSubmit={handleRegister} 
-                onLoginClick={() => setIsLogin(true)} 
-              />
-            </>
-          )}
+            <div className="w-full mt-4">
+              {isLogin ? (
+                <LoginForm 
+                  onSubmit={handleLogin} 
+                  onRegisterClick={() => setIsLogin(false)} 
+                />
+              ) : (
+                <>
+                  <AvatarUpload 
+                    user={null}
+                    onUploadComplete={(url) => {
+                      console.log('Avatar URL:', url);
+                      // Será usado quando implementarmos o perfil do usuário
+                    }}
+                  />
+                  <RegisterForm 
+                    onSubmit={handleRegister} 
+                    onLoginClick={() => setIsLogin(true)} 
+                  />
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </div>
       
@@ -128,3 +142,4 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+

@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PropertyContactForm } from "@/components/property/property-contact-form";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PropertyImageGallery } from "@/components/property/property-image-gallery";
 
 const statusBadgeStyles: Record<string, string> = {
   forSale: "bg-blue-100 text-blue-800 border-blue-200",
@@ -40,6 +41,8 @@ export default function PublicPropertyDetails() {
   const [profileData, setProfileData] = useState<{ id: string; name: string | null; company_name: string | null } | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showContactForm, setShowContactForm] = useState(false);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [initialImageIndex, setInitialImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -211,8 +214,12 @@ export default function PublicPropertyDetails() {
               {property.images.length > 0 ? (
                 <img
                   src={property.images[currentImageIndex]}
-                  alt={`${property.title} - Imagem ${currentImageIndex + 1} de ${property.images.length}`}
-                  className="w-full h-full object-cover transition-all duration-500 hover:scale-105"
+                  alt={`${property.title} - Image ${currentImageIndex + 1} of ${property.images.length}`}
+                  className="w-full h-full object-cover transition-all duration-500 hover:scale-105 cursor-pointer"
+                  onClick={() => {
+                    setInitialImageIndex(currentImageIndex);
+                    setIsGalleryOpen(true);
+                  }}
                 />
               ) : (
                 <div className="flex items-center justify-center h-full bg-gray-100 text-gray-400">
@@ -273,7 +280,11 @@ export default function PublicPropertyDetails() {
                     className={`aspect-video rounded-md overflow-hidden cursor-pointer border-2 transition-all duration-200 ${
                       currentImageIndex === idx ? 'border-propulse-600 shadow-md scale-105' : 'border-transparent'
                     }`}
-                    onClick={() => setCurrentImageIndex(idx)}
+                    onClick={() => {
+                      setCurrentImageIndex(idx);
+                      setInitialImageIndex(idx);
+                      setIsGalleryOpen(true);
+                    }}
                   >
                     <img 
                       src={image} 

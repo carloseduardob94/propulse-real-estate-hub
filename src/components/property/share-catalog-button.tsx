@@ -62,8 +62,18 @@ export function ShareCatalogButton({
       return;
     }
 
-    // Link amigável
-    const catalogUrl = `${window.location.origin}/catalogo/${currentSlug}`;
+    // Remove os subdomínios de preview do formato lovableproject.com
+    // Formato típico: f3f90cd0-03bc-485d-b29a-ef940d959c5d.lovableproject.com
+    let baseUrl = window.location.origin;
+    
+    // Verifica se está em ambiente de desenvolvimento com ID
+    if (baseUrl.includes('.lovableproject.com')) {
+      // Extrai apenas o domínio principal sem o ID de preview
+      baseUrl = 'https://' + baseUrl.split('.lovableproject.com')[0].split('.').pop() + '.lovableproject.com';
+    }
+    
+    // Se estiver em um ambiente local como localhost, mantém o origin como está
+    const catalogUrl = `${baseUrl}/catalogo/${currentSlug}`;
 
     try {
       await navigator.clipboard.writeText(catalogUrl);

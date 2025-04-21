@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { PropertyFilters } from "@/components/property/property-filters";
@@ -7,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, MapPin, Home, Bed, Bath, Maximize2, ArrowRight } from "lucide-react";
 import { usePropertyFilters } from "@/components/property/property-filter-context";
+import { FilterChips } from "./FilterChips";
 
 interface ProfileData {
   id: string;
@@ -112,6 +112,8 @@ export function PublicCatalogContent({
           setStatus={setStatus}
           onResetFilters={resetFilters}
         />
+
+        <FilterChips />
       </div>
 
       {filteredProperties.length === 0 ? (

@@ -26,6 +26,15 @@ import { Badge } from "@/components/ui/badge";
 import { PropertyContactForm } from "@/components/property/property-contact-form";
 import { Skeleton } from "@/components/ui/skeleton";
 
+// 🎨 Custom style helpers
+const statusBadgeStyles: Record<string, string> = {
+  forSale: "bg-blue-100 text-blue-800 border-blue-200",
+  forRent: "bg-green-100 text-green-800 border-green-200",
+  sold: "bg-amber-100 text-amber-800 border-amber-200",
+  rented: "bg-purple-100 text-purple-800 border-purple-200"
+};
+const featuredBadgeStyle = "bg-propulse-100 text-propulse-800 border-propulse-200";
+
 export default function PublicPropertyDetails() {
   const { slug, propertyId } = useParams<{ slug: string; propertyId: string }>();
   const [property, setProperty] = useState<Property | null>(null);
@@ -184,34 +193,33 @@ export default function PublicPropertyDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold">{profileData.company_name || profileData.name}</h1>
-              <p className="text-muted-foreground">Catálogo de Imóveis</p>
-            </div>
-            <Link to={`/catalogo/${slug}`}>
-              <Button variant="outline" size="sm">
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Voltar ao catálogo
-              </Button>
-            </Link>
+    <div className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-propulse-50">
+      {/* HEADER */}
+      <header className="bg-propulse-700 text-white rounded-b-2xl shadow-lg mb-6 animate-fade-in">
+        <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold font-montserrat">{profileData.company_name || profileData.name}</h1>
+            <p className="text-propulse-100">Catálogo de Imóveis</p>
           </div>
+          <Link to={`/catalogo/${slug}`}>
+            <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/20 hover:text-white bg-white/10">
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Voltar ao catálogo
+            </Button>
+          </Link>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto max-w-7xl px-4 py-6 animate-fade-in">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Property Gallery Column */}
           <div className="lg:col-span-2">
-            <div className="relative overflow-hidden bg-gray-100 rounded-lg aspect-video">
+            <div className="relative overflow-hidden bg-gray-100 rounded-2xl shadow-md aspect-video animate-fade-in">
               {property.images.length > 0 ? (
                 <img
                   src={property.images[currentImageIndex]}
                   alt={`${property.title} - Imagem ${currentImageIndex + 1} de ${property.images.length}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-all duration-500 hover:scale-105"
                 />
               ) : (
                 <div className="flex items-center justify-center h-full bg-gray-100 text-gray-400">
@@ -224,8 +232,8 @@ export default function PublicPropertyDetails() {
                   <Button 
                     onClick={prevImage} 
                     size="icon" 
-                    variant="ghost" 
-                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white h-8 w-8 rounded-full"
+                    variant="ghost"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white h-8 w-8 rounded-full shadow-md transition-colors"
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </Button>
@@ -233,13 +241,13 @@ export default function PublicPropertyDetails() {
                   <Button 
                     onClick={nextImage} 
                     size="icon" 
-                    variant="ghost" 
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white h-8 w-8 rounded-full"
+                    variant="ghost"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white h-8 w-8 rounded-full shadow-md transition-colors"
                   >
                     <ChevronRight className="h-5 w-5" />
                   </Button>
                   
-                  <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5">
+                  <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 z-10">
                     {property.images.map((_, idx) => (
                       <span 
                         key={idx} 
@@ -252,15 +260,12 @@ export default function PublicPropertyDetails() {
                 </>
               )}
               
-              <div className="absolute left-2 top-2 flex gap-2">
+              <div className="absolute left-3 top-3 flex gap-2 z-10">
                 {property.featured && (
-                  <Badge variant="featured">
-                    Destaque
-                  </Badge>
+                  <Badge className={featuredBadgeStyle + " shadow"}>Destaque</Badge>
                 )}
-                
                 <Badge
-                  variant={property.status === 'forSale' ? 'forSale' : 'forRent'}
+                  className={statusBadgeStyles[property.status] + " shadow"}
                 >
                   {formatStatusText(property.status)}
                 </Badge>
@@ -268,12 +273,12 @@ export default function PublicPropertyDetails() {
             </div>
 
             {property.images.length > 1 && (
-              <div className="grid grid-cols-5 gap-2 mt-2">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-3">
                 {property.images.slice(0, 5).map((image, idx) => (
                   <div 
                     key={idx} 
-                    className={`aspect-video rounded-md overflow-hidden cursor-pointer border-2 ${
-                      currentImageIndex === idx ? 'border-propulse-600' : 'border-transparent'
+                    className={`aspect-video rounded-md overflow-hidden cursor-pointer border-2 transition-all duration-200 ${
+                      currentImageIndex === idx ? 'border-propulse-600 shadow-md scale-105' : 'border-transparent'
                     }`}
                     onClick={() => setCurrentImageIndex(idx)}
                   >
@@ -287,89 +292,90 @@ export default function PublicPropertyDetails() {
               </div>
             )}
 
-            <div className="mt-8">
-              <h1 className="text-2xl font-bold">{property.title}</h1>
-              <div className="flex items-center gap-1 mt-2 text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <p>{property.address}, {property.city}, {property.state}</p>
+            <div className="mt-8 space-y-6">
+              <h1 className="text-3xl font-bold font-montserrat text-propulse-700">{property.title}</h1>
+              <div className="flex items-center gap-2 text-muted-foreground text-base">
+                <MapPin className="h-5 w-5" />
+                <span>{property.address}, {property.city}, {property.state}</span>
               </div>
               
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
-                <Card className="bg-gray-50">
+              {/* Info Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                <Card className="bg-blue-50 border-blue-100 shadow-none animate-fade-in">
                   <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-                    <Bed className="h-5 w-5 mb-1 text-propulse-600" />
-                    <p className="text-sm text-muted-foreground">Quartos</p>
-                    <p className="font-medium">{property.bedrooms}</p>
+                    <Bed className="h-5 w-5 mb-1 text-blue-600" />
+                    <p className="text-xs text-muted-foreground">Quartos</p>
+                    <p className="font-medium text-lg">{property.bedrooms}</p>
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-gray-50">
+                <Card className="bg-green-50 border-green-100 shadow-none animate-fade-in">
                   <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-                    <Bath className="h-5 w-5 mb-1 text-propulse-600" />
-                    <p className="text-sm text-muted-foreground">Banheiros</p>
-                    <p className="font-medium">{property.bathrooms}</p>
+                    <Bath className="h-5 w-5 mb-1 text-green-600" />
+                    <p className="text-xs text-muted-foreground">Banheiros</p>
+                    <p className="font-medium text-lg">{property.bathrooms}</p>
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-gray-50">
+                <Card className="bg-amber-50 border-amber-100 shadow-none animate-fade-in">
                   <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-                    <Car className="h-5 w-5 mb-1 text-propulse-600" />
-                    <p className="text-sm text-muted-foreground">Vagas</p>
-                    <p className="font-medium">{property.parkingSpaces}</p>
+                    <Car className="h-5 w-5 mb-1 text-amber-600" />
+                    <p className="text-xs text-muted-foreground">Vagas</p>
+                    <p className="font-medium text-lg">{property.parkingSpaces}</p>
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-gray-50">
+                <Card className="bg-purple-50 border-purple-100 shadow-none animate-fade-in">
                   <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-                    <Maximize2 className="h-5 w-5 mb-1 text-propulse-600" />
-                    <p className="text-sm text-muted-foreground">Área</p>
-                    <p className="font-medium">{property.area} m²</p>
+                    <Maximize2 className="h-5 w-5 mb-1 text-purple-600" />
+                    <p className="text-xs text-muted-foreground">Área</p>
+                    <p className="font-medium text-lg">{property.area} m²</p>
                   </CardContent>
                 </Card>
               </div>
               
-              <Card className="mt-6">
+              <Card className="rounded-xl bg-white/90 shadow p-0 animate-fade-in">
                 <CardHeader>
-                  <CardTitle>Descrição</CardTitle>
+                  <CardTitle className="text-propulse-700 text-xl mb-1">Descrição</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="whitespace-pre-wrap">
+                  <div className="whitespace-pre-wrap text-base text-gray-700">
                     {property.description || "Nenhuma descrição disponível"}
                   </div>
                 </CardContent>
               </Card>
               
-              <Card className="mt-6">
+              <Card className="rounded-xl bg-white/90 shadow p-0 animate-fade-in">
                 <CardHeader>
-                  <CardTitle>Informações adicionais</CardTitle>
+                  <CardTitle className="text-propulse-700 text-xl mb-1">Informações adicionais</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
                     <div>
-                      <p className="text-sm text-muted-foreground">Tipo de imóvel</p>
-                      <p>{formatPropertyType(property.type)}</p>
+                      <p className="text-xs text-muted-foreground">Tipo de imóvel</p>
+                      <p className="text-base font-medium">{formatPropertyType(property.type)}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Status</p>
-                      <p>{formatStatusText(property.status)}</p>
+                      <p className="text-xs text-muted-foreground">Status</p>
+                      <p className="text-base font-medium">{formatStatusText(property.status)}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Cidade</p>
-                      <p>{property.city}</p>
+                      <p className="text-xs text-muted-foreground">Cidade</p>
+                      <p className="text-base font-medium">{property.city}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Estado</p>
-                      <p>{property.state}</p>
+                      <p className="text-xs text-muted-foreground">Estado</p>
+                      <p className="text-base font-medium">{property.state}</p>
                     </div>
                     {property.zipCode && (
                       <div>
-                        <p className="text-sm text-muted-foreground">CEP</p>
-                        <p>{property.zipCode}</p>
+                        <p className="text-xs text-muted-foreground">CEP</p>
+                        <p className="text-base font-medium">{property.zipCode}</p>
                       </div>
                     )}
                     <div>
-                      <p className="text-sm text-muted-foreground">Publicado em</p>
-                      <p>{new Date(property.createdAt).toLocaleDateString('pt-BR')}</p>
+                      <p className="text-xs text-muted-foreground">Publicado em</p>
+                      <p className="text-base font-medium">{new Date(property.createdAt).toLocaleDateString('pt-BR')}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -378,20 +384,20 @@ export default function PublicPropertyDetails() {
           </div>
           
           {/* Contact Column */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-8">
-              <Card className="bg-white shadow-md">
+          <div className="lg:col-span-1 mt-6 lg:mt-0 animate-fade-in">
+            <div className="sticky top-8 space-y-6">
+              <Card className="bg-white/95 shadow-lg rounded-xl animate-fade-in">
                 <CardHeader className="border-b">
-                  <CardTitle className="text-2xl">
+                  <CardTitle className="text-2xl font-bold text-propulse-700">
                     {property.status === 'forSale' ? 'Compre por' : 'Alugue por'}
                   </CardTitle>
-                  <p className="text-3xl font-bold text-propulse-600">
+                  <p className="text-3xl font-extrabold text-propulse-600 mt-1">
                     R$ {property.price.toLocaleString('pt-BR')}
                   </p>
-                  {property.status === 'forRent' && <p className="text-sm text-muted-foreground">por mês</p>}
+                  {property.status === 'forRent' && <p className="text-xs text-muted-foreground">por mês</p>}
                 </CardHeader>
                 <CardContent className="pt-6">
-                  <p className="text-center mb-6">
+                  <p className="text-center mb-6 text-base">
                     Interessado neste imóvel? Entre em contato!
                   </p>
                   
@@ -404,7 +410,7 @@ export default function PublicPropertyDetails() {
                     />
                   ) : (
                     <Button 
-                      className="w-full bg-propulse-600 hover:bg-propulse-700 text-white"
+                      className="w-full bg-propulse-600 hover:bg-propulse-700 text-white font-semibold text-lg animate-fade-in"
                       onClick={() => setShowContactForm(true)}
                     >
                       Tenho Interesse
@@ -413,16 +419,16 @@ export default function PublicPropertyDetails() {
                 </CardContent>
               </Card>
               
-              <Card className="mt-6">
+              <Card className="rounded-xl shadow bg-white/95 py-2 px-2 animate-fade-in">
                 <CardHeader>
-                  <CardTitle>Sobre o anunciante</CardTitle>
+                  <CardTitle className="text-propulse-700 text-lg">Sobre o anunciante</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center">
-                    <h3 className="font-semibold text-lg">{profileData.company_name || profileData.name}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">Consulte esse e outros imóveis no catálogo</p>
+                    <h3 className="font-semibold text-base">{profileData.company_name || profileData.name}</h3>
+                    <p className="text-xs text-muted-foreground mt-1">Consulte esse e outros imóveis no catálogo</p>
                     <Link to={`/catalogo/${slug}`} className="block mt-4">
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full border-propulse-300 text-propulse-700 hover:bg-propulse-50 font-medium shadow-sm">
                         Ver catálogo completo
                       </Button>
                     </Link>
@@ -434,7 +440,7 @@ export default function PublicPropertyDetails() {
         </div>
       </main>
       
-      <footer className="bg-white border-t py-6 mt-12">
+      <footer className="bg-white border-t py-6 mt-12 animate-fade-in">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           <p>&copy; {new Date().getFullYear()} {profileData.company_name || profileData.name}. Todos os direitos reservados.</p>
           <p className="mt-1">Powered by MeuCorretorPRO</p>

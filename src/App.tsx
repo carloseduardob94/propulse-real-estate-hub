@@ -18,6 +18,7 @@ import PlansPage from "./pages/PlansPage";
 import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
 import PublicCatalog from "./pages/PublicCatalog";
+import PublicPropertyDetails from "./pages/PublicPropertyDetails";
 
 const queryClient = new QueryClient();
 
@@ -124,6 +125,7 @@ const App = () => {
               } 
             />
             <Route path="/catalogo/:slug" element={<PublicCatalog />} />
+            <Route path="/catalogo/:slug/:propertyId" element={<PublicPropertyDetails />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

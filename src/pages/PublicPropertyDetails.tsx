@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,7 +25,6 @@ import { Badge } from "@/components/ui/badge";
 import { PropertyContactForm } from "@/components/property/property-contact-form";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// 🎨 Custom style helpers
 const statusBadgeStyles: Record<string, string> = {
   forSale: "bg-blue-100 text-blue-800 border-blue-200",
   forRent: "bg-green-100 text-green-800 border-green-200",
@@ -47,7 +45,6 @@ export default function PublicPropertyDetails() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // First, fetch the profile by slug
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -65,7 +62,6 @@ export default function PublicPropertyDetails() {
           company_name: profile.company_name
         });
 
-        // Then, fetch the property by ID
         const { data: propertyData, error: propertyError } = await supabase
           .from('properties')
           .select('*')
@@ -78,7 +74,6 @@ export default function PublicPropertyDetails() {
           return;
         }
         
-        // Transform the property data
         const typedProperty: Property = {
           id: propertyData.id,
           title: propertyData.title,
@@ -194,7 +189,6 @@ export default function PublicPropertyDetails() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-propulse-50">
-      {/* HEADER */}
       <header className="bg-propulse-700 text-white rounded-b-2xl shadow-lg mb-6 animate-fade-in">
         <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -212,7 +206,6 @@ export default function PublicPropertyDetails() {
 
       <main className="container mx-auto max-w-7xl px-4 py-6 animate-fade-in">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Property Gallery Column */}
           <div className="lg:col-span-2">
             <div className="relative overflow-hidden bg-gray-100 rounded-2xl shadow-md aspect-video animate-fade-in">
               {property.images.length > 0 ? (
@@ -299,7 +292,6 @@ export default function PublicPropertyDetails() {
                 <span>{property.address}, {property.city}, {property.state}</span>
               </div>
               
-              {/* Info Cards */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
                 <Card className="bg-blue-50 border-blue-100 shadow-none animate-fade-in">
                   <CardContent className="p-4 flex flex-col items-center justify-center text-center">
@@ -383,7 +375,6 @@ export default function PublicPropertyDetails() {
             </div>
           </div>
           
-          {/* Contact Column */}
           <div className="lg:col-span-1 mt-6 lg:mt-0 animate-fade-in">
             <div className="sticky top-8 space-y-6">
               <Card className="bg-white/95 shadow-lg rounded-xl animate-fade-in">
@@ -406,6 +397,8 @@ export default function PublicPropertyDetails() {
                       propertyId={property.id} 
                       userId={profileData.id}
                       propertyTitle={property.title}
+                      propertyPrice={property.price}
+                      propertyRegion={`${property.address}, ${property.city}, ${property.state}`}
                       onClose={() => setShowContactForm(false)}
                     />
                   ) : (

@@ -11,15 +11,17 @@ interface PropertyContactFormProps {
   propertyId: string;
   userId: string;
   propertyTitle: string;
+  propertyPrice?: number;
+  propertyRegion?: string;
   onClose?: () => void;
 }
 
-export function PropertyContactForm({ propertyId, userId, propertyTitle, onClose }: PropertyContactFormProps) {
+export function PropertyContactForm({ propertyId, userId, propertyTitle, propertyPrice, propertyRegion, onClose }: PropertyContactFormProps) {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
+    whatsapp: "",
     message: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,23 +36,26 @@ export function PropertyContactForm({ propertyId, userId, propertyTitle, onClose
     setIsSubmitting(true);
 
     try {
-      // Form validation
-      if (!formData.name || !formData.phone) {
-        throw new Error("Nome e telefone são obrigatórios");
+      // Validação
+      if (!formData.name || !formData.whatsapp) {
+        throw new Error("Nome e Whatsapp são obrigatórios");
       }
 
-      // Submit lead to database
+      // Monta observações preenchendo com a mensagem do cliente, se houver
+      const observacoes = formData.message ? formData.message : "";
+
+      // Envia lead para o banco
       const { error } = await supabase.from('leads').insert([
         {
           name: formData.name,
           email: formData.email,
-          phone: formData.phone,
-          message: formData.message,
+          phone: formData.whatsapp,
+          message: observacoes,
           user_id: userId,
-          property_type: [propertyTitle], // Store property title in array for compatibility
-          preferred_location: "Interesse via catálogo público",
+          property_type: [propertyTitle], // compatibilidade
+          preferred_location: propertyRegion || "Interesse via catálogo público",
           status: "new",
-          budget: 0, // Default value as it's required in the DB
+          budget: propertyPrice ?? 0,
         },
       ]);
 
@@ -61,14 +66,14 @@ export function PropertyContactForm({ propertyId, userId, propertyTitle, onClose
         description: "O corretor entrará em contato em breve.",
       });
 
-      // Reset form or close it
+      // Limpa ou fecha o formulário
       if (onClose) {
         onClose();
       } else {
         setFormData({
           name: "",
           email: "",
-          phone: "",
+          whatsapp: "",
           message: ""
         });
       }
@@ -111,11 +116,11 @@ export function PropertyContactForm({ propertyId, userId, propertyTitle, onClose
       </div>
       
       <div>
-        <Label htmlFor="phone">Telefone*</Label>
+        <Label htmlFor="whatsapp">Whatsapp*</Label>
         <Input
-          id="phone"
-          name="phone"
-          value={formData.phone}
+          id="whatsapp"
+          name="whatsapp"
+          value={formData.whatsapp}
           onChange={handleChange}
           placeholder="(00) 00000-0000"
           required
@@ -123,7 +128,7 @@ export function PropertyContactForm({ propertyId, userId, propertyTitle, onClose
       </div>
       
       <div>
-        <Label htmlFor="message">Mensagem</Label>
+        <Label htmlFor="message">Observações</Label>
         <Textarea
           id="message"
           name="message"
@@ -151,3 +156,4 @@ export function PropertyContactForm({ propertyId, userId, propertyTitle, onClose
     </form>
   );
 }
+

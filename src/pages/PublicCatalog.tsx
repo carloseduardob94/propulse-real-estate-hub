@@ -105,7 +105,7 @@ function PublicCatalogContent({
         bathrooms={bathrooms}
         setBathrooms={setBathrooms}
         priceRange={priceRange}
-        setPriceRange={setPricePrice}
+        setPriceRange={setPriceRange}
         status={status}
         setStatus={setStatus}
         onResetFilters={resetFilters}

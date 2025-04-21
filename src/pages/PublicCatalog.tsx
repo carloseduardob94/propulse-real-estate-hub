@@ -1,14 +1,11 @@
 
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { PropertyFilterProvider } from "@/components/property/property-filter-context";
-import { PropertyFilters } from "@/components/property/property-filters";
-import { PropertyGrid } from "@/components/property/property-grid";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Property } from "@/types";
-import { usePropertyFilters } from "@/components/property/property-filter-context";
+import { PublicCatalogHeader } from "@/components/public-catalog/public-catalog-header";
+import { PublicCatalogContent } from "@/components/public-catalog/public-catalog-content";
 
 interface ProfileData {
   id: string;
@@ -16,131 +13,10 @@ interface ProfileData {
   company_name: string | null;
 }
 
-function PublicCatalogContent({ 
-  properties, 
-  isLoading, 
-  profileData,
-  slug
-}: { 
-  properties: Property[];
-  isLoading: boolean;
-  profileData: ProfileData;
-  slug: string;
-}) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const {
-    filteredProperties,
-    searchTerm,
-    setSearchTerm,
-    propertyType,
-    setPropertyType,
-    bedrooms,
-    setBedrooms,
-    bathrooms,
-    setBathrooms,
-    priceRange,
-    setPriceRange,
-    status,
-    setStatus,
-    resetFilters
-  } = usePropertyFilters();
-
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const itemsPerPage = 9;
-
-  // Custom property grid renderer that uses links to property details
-  const renderPropertyGrid = () => {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProperties.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((property) => (
-          <Link 
-            key={property.id} 
-            to={`/catalogo/${slug}/${property.id}`}
-            className="block hover:no-underline transition-transform hover:translate-y-[-4px]"
-          >
-            <Card className="overflow-hidden h-full flex flex-col">
-              <div className="relative aspect-video overflow-hidden">
-                <img
-                  src={property.images[0] || '/placeholder.svg'}
-                  alt={property.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <CardHeader className="p-4 pb-0">
-                <CardTitle className="text-lg">{property.title}</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  {property.city}, {property.state}
-                </p>
-              </CardHeader>
-              <CardContent className="p-4 flex-grow">
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>{property.bedrooms} quartos</span>
-                  <span>{property.bathrooms} banheiros</span>
-                  <span>{property.area} m²</span>
-                </div>
-                <p className="mt-4 text-lg font-bold text-propulse-600">
-                  R$ {property.price.toLocaleString('pt-BR')}
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
-      </div>
-    );
-  };
-
-  return (
-    <>
-      <PropertyFilters
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        propertyType={propertyType}
-        setPropertyType={setPropertyType}
-        bedrooms={bedrooms}
-        setBedrooms={setBedrooms}
-        bathrooms={bathrooms}
-        setBathrooms={setBathrooms}
-        priceRange={priceRange}
-        setPriceRange={setPriceRange}
-        status={status}
-        setStatus={setStatus}
-        onResetFilters={resetFilters}
-      />
-      
-      {renderPropertyGrid()}
-      
-      {/* Pagination */}
-      {filteredProperties.length > itemsPerPage && (
-        <div className="flex justify-center mt-8">
-          <div className="flex gap-2">
-            {Array.from({ length: Math.ceil(filteredProperties.length / itemsPerPage) }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => handlePageChange(i + 1)}
-                className={`h-10 w-10 rounded-md flex items-center justify-center ${
-                  currentPage === i + 1
-                    ? "bg-propulse-600 text-white"
-                    : "bg-white text-gray-600 border hover:bg-gray-50"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
-
 export default function PublicCatalog() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
 
@@ -153,7 +29,7 @@ export default function PublicCatalog() {
           .select('*')
           .eq('slug', slug)
           .single();
-        
+
         if (profileError || !profile) {
           console.error("Profile not found:", profileError);
           navigate('/not-found');
@@ -166,12 +42,12 @@ export default function PublicCatalog() {
           .from('properties')
           .select('*')
           .eq('user_id', profile.id);
-          
+
         if (propertiesError) {
           console.error("Error fetching properties:", propertiesError);
           return;
         }
-        
+
         const typedProperties = propertiesData.map(p => ({
           id: p.id,
           title: p.title,
@@ -192,7 +68,7 @@ export default function PublicCatalog() {
           createdAt: p.created_at,
           updatedAt: p.updated_at
         }));
-        
+
         setProperties(typedProperties);
       } catch (error) {
         console.error("Error:", error);
@@ -210,7 +86,6 @@ export default function PublicCatalog() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <span className="ml-2">Carregando catálogo...</span>
       </div>
     );
@@ -224,13 +99,8 @@ export default function PublicCatalog() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b">
-        <div className="container mx-auto px-4 py-6">
-          <h1 className="text-2xl font-bold">{profileName}</h1>
-          <p className="text-muted-foreground">Catálogo de Imóveis</p>
-        </div>
-      </header>
-
+      <PublicCatalogHeader profileName={profileName} />
+      
       <main className="container mx-auto px-4 py-8">
         <Card className="mb-8">
           <CardHeader>
@@ -242,11 +112,10 @@ export default function PublicCatalog() {
             </p>
           </CardContent>
         </Card>
-
         <PropertyFilterProvider properties={properties}>
-          <PublicCatalogContent 
-            properties={properties} 
-            isLoading={isLoading} 
+          <PublicCatalogContent
+            properties={properties}
+            isLoading={isLoading}
             profileData={profileData}
             slug={slug || ""}
           />

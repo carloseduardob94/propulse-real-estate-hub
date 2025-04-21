@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom"; // Added Link import
 import { supabase } from "@/integrations/supabase/client";
 import { Property } from "@/types";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"; // Added missing Card components
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PropertyImageGallery } from "@/components/property/property-image-gallery";
@@ -12,6 +13,7 @@ import { PublicPropertyFooter } from "@/components/property/public-property-foot
 import { PropertyDetailsContent } from "@/components/property/property-details-content";
 import { PropertyContactSidebar } from "@/components/property/property-contact-sidebar";
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { formatStatusText } from "@/utils/property-formatters"; // Added formatStatusText import
 
 const statusBadgeStyles: Record<string, string> = {
   forSale: "bg-blue-100 text-blue-800 border-blue-200",

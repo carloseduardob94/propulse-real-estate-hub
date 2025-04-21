@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Logo } from '@/components/brand/logo';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -49,15 +48,14 @@ export const PublicCatalogHeader: React.FC<PublicCatalogHeaderProps> = ({
             <div className="h-6 w-px bg-gray-200" />
 
             <div className="flex items-center space-x-4">
-              <Avatar className="h-20 w-20 border-2 border-propulse-100"> {/* 80x80 px */}
+              <Avatar className="h-16 w-16 border-2 border-propulse-100"> {/* 64x64 px */}
                 {avatarUrl ? (
-                  // Use native img with srcSet to improve image quality on high dpi screens
                   <img
                     src={avatarUrl}
                     srcSet={buildSrcSet(avatarUrl)}
                     alt={profileName}
-                    width={80}
-                    height={80}
+                    width={64}
+                    height={64}
                     className="object-cover rounded-full aspect-square"
                     loading="lazy"
                     decoding="async"
@@ -91,4 +89,3 @@ export const PublicCatalogHeader: React.FC<PublicCatalogHeaderProps> = ({
     </header>
   );
 };
-

@@ -7,21 +7,53 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ShareCatalogButtonProps {
-  userSlug: string;
+  userSlug?: string; // agora opcional
   variant?: "outline" | "ghost" | "default";
   className?: string;
 }
 
-export function ShareCatalogButton({ userSlug, variant = "outline", className }: ShareCatalogButtonProps) {
+/**
+ * Obtém o slug do usuário autenticado via Supabase.
+ */
+async function getUserSlug(): Promise<string | null> {
+  // Recupera usuário autenticado
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return null;
+  }
+  // Busca perfil do usuário para obter o slug
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("slug")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  return profile?.slug || null;
+}
+
+export function ShareCatalogButton({
+  userSlug,
+  variant = "outline",
+  className,
+}: ShareCatalogButtonProps) {
   const [showTooltip, setShowTooltip] = useState(false);
+  const [currentSlug, setCurrentSlug] = useState<string | null>(userSlug || null);
   const { toast } = useToast();
-  
-  const handleShare = async () => {
+
+  // Obtém slug dinamicamente se não passado por prop
+  useEffect(() => {
     if (!userSlug) {
+      getUserSlug().then(setCurrentSlug);
+    }
+  }, [userSlug]);
+
+  const handleShare = async () => {
+    if (!currentSlug) {
       toast({
         title: "Erro",
         description: "Não foi possível gerar o link do catálogo. Perfil incompleto.",
@@ -29,25 +61,24 @@ export function ShareCatalogButton({ userSlug, variant = "outline", className }:
       });
       return;
     }
-    
-    // Get the base URL without any preview or development-specific parts
-    const baseUrl = window.location.origin.replace(/id-preview--[^.]+\./, '');
-    const catalogUrl = `${baseUrl}/catalogo/${userSlug}`;
-    
+
+    // Link amigável
+    const catalogUrl = `${window.location.origin}/catalogo/${currentSlug}`;
+
     try {
       await navigator.clipboard.writeText(catalogUrl);
       setShowTooltip(true);
-      
+
       toast({
-        title: "Link copiado!",
-        description: "Link do catálogo copiado para a área de transferência.",
+        title: "Link copiado com sucesso!",
+        description: "O link do catálogo foi copiado para a área de transferência.",
       });
-      
+
       setTimeout(() => {
         setShowTooltip(false);
       }, 2000);
     } catch (err) {
-      console.error('Failed to copy: ', err);
+      console.error("Failed to copy: ", err);
       toast({
         title: "Erro",
         description: "Não foi possível copiar o link. Verifique as permissões do navegador.",
@@ -60,7 +91,7 @@ export function ShareCatalogButton({ userSlug, variant = "outline", className }:
     <TooltipProvider>
       <Tooltip open={showTooltip}>
         <TooltipTrigger asChild>
-          <Button 
+          <Button
             variant={variant}
             className={`bg-white/10 text-white border-white/20 hover:bg-white/20 hover:text-white ${className}`}
             onClick={handleShare}

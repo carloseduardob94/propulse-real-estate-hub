@@ -2,15 +2,16 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { PropertyFilterProvider } from "@/components/property/property-filter-context";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { PublicCatalogHeader } from "@/components/public-catalog/public-catalog-header";
 import { PublicCatalogContent } from "@/components/public-catalog/public-catalog-content";
+import { Loader2 } from "lucide-react";
 
 interface ProfileData {
   id: string;
   name: string | null;
   company_name: string | null;
+  avatar_url?: string | null;
 }
 
 export default function PublicCatalog() {
@@ -85,8 +86,9 @@ export default function PublicCatalog() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <span className="ml-2">Carregando catálogo...</span>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+        <Loader2 className="h-12 w-12 animate-spin text-propulse-600 mb-4" />
+        <span className="text-lg text-propulse-800 font-medium">Carregando catálogo...</span>
       </div>
     );
   }
@@ -98,20 +100,13 @@ export default function PublicCatalog() {
   const profileName = profileData.company_name || profileData.name || "Catálogo de Imóveis";
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <PublicCatalogHeader profileName={profileName} />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+      <PublicCatalogHeader 
+        profileName={profileName} 
+        avatarUrl={profileData.avatar_url} 
+      />
       
       <main className="container mx-auto px-4 py-8">
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Imóveis disponíveis</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Confira nossa seleção de {properties.length} imóveis disponíveis
-            </p>
-          </CardContent>
-        </Card>
         <PropertyFilterProvider properties={properties}>
           <PublicCatalogContent
             properties={properties}
@@ -122,10 +117,15 @@ export default function PublicCatalog() {
         </PropertyFilterProvider>
       </main>
 
-      <footer className="bg-white border-t py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} {profileName}. Todos os direitos reservados.</p>
-          <p className="mt-1">Powered by MeuCorretorPRO</p>
+      <footer className="bg-white border-t py-6 shadow-inner">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-sm text-muted-foreground">
+            &copy; {new Date().getFullYear()} {profileName}. Todos os direitos reservados.
+          </p>
+          <div className="flex items-center justify-center mt-2">
+            <span className="text-xs text-propulse-600 font-medium">Powered by</span>
+            <span className="text-xs font-bold text-propulse-800 ml-1">MeuCorretorPRO</span>
+          </div>
         </div>
       </footer>
     </div>

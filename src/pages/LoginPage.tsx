@@ -83,66 +83,74 @@ const LoginPage = () => {
     }
   };
 
-  console.log("Rendering LoginPage component");
-
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-propulse-50 via-white to-propulse-50">
-      <div className="flex-1 flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-lg flex flex-col items-center space-y-6">
-          <div className="w-full flex justify-start mb-2">
-            <Button
-              variant="propulse"
-              size="sm"
-              onClick={() => navigate('/')}
-              aria-label="Voltar para a página inicial"
-              className="z-10 shadow-sm"
-            >
-              <Home className="h-4 w-4 mr-1" />
-              Início
-            </Button>
-          </div>
+    <div className="min-h-screen w-full flex flex-col justify-center items-center relative bg-[linear-gradient(108deg,_#f0f5ff_20%,_#fbed96_100%)]">
+      {/* Botão "Início" absoluto e melhor posicionado */}
+      <div className="absolute top-8 left-8 z-20">
+        <Button
+          variant="propulse"
+          size="sm"
+          onClick={() => navigate('/')}
+          aria-label="Início"
+          className="shadow-md px-5 py-2 flex items-center gap-1"
+        >
+          <Home className="h-5 w-5 mr-1" />
+          Início
+        </Button>
+      </div>
 
-          <div className="flex flex-col items-center space-y-2 bg-white/80 backdrop-blur-lg w-full p-8 rounded-2xl shadow-xl">
-            <div className="flex justify-center w-full">
-              <Logo className="mx-auto" iconOnly={!isLogin} />
-            </div>
-            
-            <h1 className="text-2xl font-bold text-gray-900 text-center">
-              {isLogin ? "Bem-vindo de volta!" : "Criar nova conta"}
-            </h1>
-            <p className="text-gray-600 text-center max-w-xs">
-              {isLogin 
-                ? "Entre com suas credenciais para acessar sua conta" 
-                : "Preencha os dados abaixo para criar sua conta"}
-            </p>
+      <main className="flex flex-1 justify-center items-center w-full px-2">
+        <div
+          className="
+            animate-[fade-in_0.6s_ease]
+            w-full max-w-md md:max-w-lg
+            flex flex-col items-center
+            bg-white/60 backdrop-blur-2xl
+            rounded-3xl shadow-2xl border border-white/40
+            p-6 md:p-10
+            md:mt-16 mt-10
+            glass-morphism
+          "
+          style={{ boxShadow: "0 8px 40px 0 rgba(86,76,255,0.12)" }}
+        >
+          <Logo className="mx-auto mb-4 scale-110" iconOnly={!isLogin} />
 
-            <div className="w-full mt-4">
-              {isLogin ? (
-                <LoginForm 
-                  onSubmit={handleLogin} 
-                  onRegisterClick={() => setIsLogin(false)} 
+          <h1 className="text-3xl md:text-4xl font-extrabold text-propulse-700 text-center mb-1 animate-fade-in">
+            {isLogin ? "Bem-vindo de volta!" : "Criar nova conta"}
+          </h1>
+          <p className="text-gray-600 text-base text-center mb-4 max-w-xs font-medium animate-fade-in">
+            {isLogin 
+              ? "Acesse sua conta para explorar o MeuCorretorPRO"
+              : "Preencha as informações para começar sua jornada"}
+          </p>
+
+          <div className="w-full flex flex-col gap-4 animate-fade-in">
+            {isLogin ? (
+              <LoginForm 
+                onSubmit={handleLogin} 
+                onRegisterClick={() => setIsLogin(false)}
+                className="bg-transparent shadow-none border-none"
+              />
+            ) : (
+              <>
+                <AvatarUpload
+                  user={null}
+                  onUploadComplete={(url) => {
+                    // Futuro: usaremos url do avatar no perfil
+                  }}
                 />
-              ) : (
-                <>
-                  <AvatarUpload 
-                    user={null}
-                    onUploadComplete={(url) => {
-                      console.log('Avatar URL:', url);
-                      // Será usado quando implementarmos o perfil do usuário
-                    }}
-                  />
-                  <RegisterForm 
-                    onSubmit={handleRegister} 
-                    onLoginClick={() => setIsLogin(true)} 
-                  />
-                </>
-              )}
-            </div>
+                <RegisterForm 
+                  onSubmit={handleRegister} 
+                  onLoginClick={() => setIsLogin(true)}
+                  className="bg-transparent shadow-none border-none"
+                />
+              </>
+            )}
           </div>
         </div>
-      </div>
-      
-      <footer className="py-6 text-center text-sm text-gray-600">
+      </main>
+
+      <footer className="w-full py-6 text-center text-xs md:text-sm text-gray-500 font-semibold bg-transparent absolute bottom-2">
         &copy; {new Date().getFullYear()}. Todos os direitos reservados.
       </footer>
     </div>
@@ -150,4 +158,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-

@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Logo } from "@/components/brand/logo";
 import { AvatarUpload } from "@/components/auth/avatar-upload";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft } from "lucide-react";
+import { Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const LoginPage = () => {
@@ -91,14 +91,14 @@ const LoginPage = () => {
         <div className="w-full max-w-lg flex flex-col items-center space-y-6">
           <div className="w-full flex justify-start mb-2">
             <Button
-              variant="propulse-outline"
+              variant="propulse"
               size="sm"
               onClick={() => navigate('/')}
               aria-label="Voltar para a página inicial"
               className="z-10 shadow-sm"
             >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Voltar
+              <Home className="h-4 w-4 mr-1" />
+              Início
             </Button>
           </div>
 
@@ -143,7 +143,7 @@ const LoginPage = () => {
       </div>
       
       <footer className="py-6 text-center text-sm text-gray-600">
-        &copy; {new Date().getFullYear()} MeuCorretorPRO. Todos os direitos reservados.
+        &copy; {new Date().getFullYear()}. Todos os direitos reservados.
       </footer>
     </div>
   );

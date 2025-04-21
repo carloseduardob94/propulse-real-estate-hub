@@ -7,8 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Logo } from "@/components/brand/logo";
 import { AvatarUpload } from "@/components/auth/avatar-upload";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -86,29 +84,15 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-propulse-50 via-white to-propulse-50">
       <div className="flex-1 flex items-center justify-center p-4">
-        <div className="bg-white/80 backdrop-blur-lg w-full max-w-lg p-8 rounded-2xl shadow-xl space-y-8 relative">
-          
-          {/* Botão Voltar para o início corrigido para posicionamento correto */}
-          <div className="absolute top-4 left-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-propulse-600 hover:text-propulse-700 flex items-center"
-              onClick={() => navigate("/")}
-            >
-              <ArrowLeft className="mr-2 w-4 h-4" />
-              Voltar para o início
-            </Button>
-          </div>
-
+        <div className="bg-white/80 backdrop-blur-lg w-full max-w-lg p-8 rounded-2xl shadow-xl space-y-8">
           <div className="text-center space-y-2">
             <Logo className="mx-auto" />
             <h1 className="text-2xl font-bold text-gray-900">
               {isLogin ? "Bem-vindo de volta!" : "Criar nova conta"}
             </h1>
             <p className="text-gray-600">
-              {isLogin
-                ? "Entre com suas credenciais para acessar sua conta"
+              {isLogin 
+                ? "Entre com suas credenciais para acessar sua conta" 
                 : "Preencha os dados abaixo para criar sua conta"}
             </p>
           </div>
@@ -124,6 +108,7 @@ const LoginPage = () => {
                 user={null}
                 onUploadComplete={(url) => {
                   console.log('Avatar URL:', url);
+                  // Será usado quando implementarmos o perfil do usuário
                 }}
               />
               <RegisterForm 

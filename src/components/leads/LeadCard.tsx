@@ -1,6 +1,6 @@
 
 import { Lead } from "@/types";
-import { User, MailIcon, Phone, DollarSign, MapPin, Clock, ChevronRight } from "lucide-react";
+import { User, MailIcon, Phone, DollarSign, MapPin, Clock, ChevronRight, MessageSquare } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -103,6 +103,13 @@ export function LeadCard({ lead }: LeadCardProps) {
             <Clock className="h-4 w-4 text-muted-foreground" />
             <span>Cadastrado em: {new Date(lead.createdAt).toLocaleDateString('pt-BR')}</span>
           </div>
+          
+          {lead.message && (
+            <div className="flex gap-2 mt-1">
+              <MessageSquare className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+              <span className="text-sm text-muted-foreground line-clamp-2">{lead.message}</span>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

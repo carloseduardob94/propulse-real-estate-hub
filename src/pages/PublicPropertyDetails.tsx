@@ -5,26 +5,20 @@ import { Property } from "@/types";
 import { 
   Card, 
   CardContent,
-  CardFooter,
   CardHeader,
   CardTitle,
   CardDescription 
 } from "@/components/ui/card";
-import { 
-  Bed, 
-  Bath, 
-  Car, 
-  Maximize2, 
-  MapPin, 
-  Calendar, 
-  ChevronLeft,
-  ChevronRight
-} from "lucide-react";
+import { MapPin, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PropertyContactForm } from "@/components/property/property-contact-form";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PropertyImageGallery } from "@/components/property/property-image-gallery";
+import { PropertyInfoCards } from "@/components/property/property-info-cards";
+import { PublicPropertyHeader } from "@/components/property/public-property-header";
+import { PublicPropertyFooter } from "@/components/property/public-property-footer";
+import { formatStatusText, formatPropertyType } from "@/utils/property-formatters";
 
 const statusBadgeStyles: Record<string, string> = {
   forSale: "bg-blue-100 text-blue-800 border-blue-200",
@@ -131,27 +125,6 @@ export default function PublicPropertyDetails() {
     setIsGalleryOpen(true);
   };
 
-  const formatStatusText = (status: string) => {
-    switch (status) {
-      case 'forSale': return 'Venda';
-      case 'forRent': return 'Aluguel';
-      case 'sold': return 'Vendido';
-      case 'rented': return 'Alugado';
-      default: return status;
-    }
-  };
-
-  const formatPropertyType = (type: string) => {
-    switch (type) {
-      case 'house': return 'Casa';
-      case 'apartment': return 'Apartamento';
-      case 'land': return 'Terreno';
-      case 'commercial': return 'Comercial';
-      case 'rural': return 'Rural';
-      default: return type;
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 py-12">
@@ -198,20 +171,11 @@ export default function PublicPropertyDetails() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-propulse-50">
-      <header className="bg-propulse-700 text-white rounded-b-2xl shadow-lg mb-6 animate-fade-in">
-        <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold font-montserrat">{profileData.company_name || profileData.name}</h1>
-            <p className="text-propulse-100">Catálogo de Imóveis</p>
-          </div>
-          <Link to={`/catalogo/${slug}`}>
-            <Button variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/20 hover:text-white bg-white/10">
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Voltar ao catálogo
-            </Button>
-          </Link>
-        </div>
-      </header>
+      <PublicPropertyHeader 
+        companyName={profileData.company_name}
+        name={profileData.name}
+        slug={slug!}
+      />
 
       <main className="container mx-auto max-w-7xl px-4 py-6 animate-fade-in">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -305,39 +269,12 @@ export default function PublicPropertyDetails() {
                 <span>{property.address}, {property.city}, {property.state}</span>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                <Card className="bg-blue-50 border-blue-100 shadow-none animate-fade-in">
-                  <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-                    <Bed className="h-5 w-5 mb-1 text-blue-600" />
-                    <p className="text-xs text-muted-foreground">Quartos</p>
-                    <p className="font-medium text-lg">{property.bedrooms}</p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-green-50 border-green-100 shadow-none animate-fade-in">
-                  <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-                    <Bath className="h-5 w-5 mb-1 text-green-600" />
-                    <p className="text-xs text-muted-foreground">Banheiros</p>
-                    <p className="font-medium text-lg">{property.bathrooms}</p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-amber-50 border-amber-100 shadow-none animate-fade-in">
-                  <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-                    <Car className="h-5 w-5 mb-1 text-amber-600" />
-                    <p className="text-xs text-muted-foreground">Vagas</p>
-                    <p className="font-medium text-lg">{property.parkingSpaces}</p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-purple-50 border-purple-100 shadow-none animate-fade-in">
-                  <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-                    <Maximize2 className="h-5 w-5 mb-1 text-purple-600" />
-                    <p className="text-xs text-muted-foreground">Área</p>
-                    <p className="font-medium text-lg">{property.area} m²</p>
-                  </CardContent>
-                </Card>
-              </div>
+              <PropertyInfoCards
+                bedrooms={property.bedrooms}
+                bathrooms={property.bathrooms}
+                parkingSpaces={property.parkingSpaces}
+                area={property.area}
+              />
               
               <Card className="rounded-xl bg-white/90 shadow p-0 animate-fade-in">
                 <CardHeader>
@@ -455,12 +392,10 @@ export default function PublicPropertyDetails() {
         />
       )}
       
-      <footer className="bg-white border-t py-6 mt-12 animate-fade-in">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} {profileData.company_name || profileData.name}. Todos os direitos reservados.</p>
-          <p className="mt-1">Powered by MeuCorretorPRO</p>
-        </div>
-      </footer>
+      <PublicPropertyFooter 
+        companyName={profileData.company_name}
+        name={profileData.name}
+      />
     </div>
   );
 }

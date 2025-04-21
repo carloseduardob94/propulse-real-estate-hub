@@ -31,17 +31,22 @@ export const PublicCatalogHeader: React.FC<PublicCatalogHeaderProps> = ({
             
             <div className="h-6 w-px bg-gray-200" />
             
-            <div className="flex items-center space-x-3">
-              <Avatar className="h-10 w-10 border-2 border-propulse-100">
-                <AvatarImage src={avatarUrl || undefined} alt={profileName} />
-                <AvatarFallback className="bg-propulse-100 text-propulse-800 font-medium">
+            <div className="flex items-center space-x-4">
+              <Avatar className="h-20 w-20 border-2 border-propulse-100"> {/* 80x80 px */}
+                <AvatarImage 
+                  src={avatarUrl || undefined} 
+                  alt={profileName} 
+                  className="object-cover aspect-square h-full w-full"
+                  // object-fit: cover ensured by className in ui/avatar and tailwind
+                />
+                <AvatarFallback className="bg-propulse-100 text-propulse-800 font-medium text-lg">
                   {getInitials(profileName)}
                 </AvatarFallback>
               </Avatar>
               
               <div>
-                <h1 className="font-semibold text-lg leading-tight">{profileName}</h1>
-                <p className="text-xs text-muted-foreground">Catálogo de Imóveis</p>
+                <h1 className="font-semibold text-xl md:text-2xl leading-tight">{profileName}</h1>
+                <p className="text-sm text-muted-foreground">Catálogo de Imóveis</p>
               </div>
             </div>
           </div>
@@ -50,6 +55,7 @@ export const PublicCatalogHeader: React.FC<PublicCatalogHeaderProps> = ({
             <a 
               href="/"
               className="text-sm font-medium text-propulse-600 hover:text-propulse-700 transition-colors"
+              aria-label="Voltar para o site"
             >
               Voltar para o site
             </a>

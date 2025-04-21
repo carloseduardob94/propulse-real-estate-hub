@@ -1,24 +1,17 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Property } from "@/types";
-import { 
-  Card, 
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription 
-} from "@/components/ui/card";
-import { MapPin, Calendar } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PropertyContactForm } from "@/components/property/property-contact-form";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PropertyImageGallery } from "@/components/property/property-image-gallery";
-import { PropertyInfoCards } from "@/components/property/property-info-cards";
 import { PublicPropertyHeader } from "@/components/property/public-property-header";
 import { PublicPropertyFooter } from "@/components/property/public-property-footer";
-import { formatStatusText, formatPropertyType } from "@/utils/property-formatters";
+import { PropertyDetailsContent } from "@/components/property/property-details-content";
+import { PropertyContactSidebar } from "@/components/property/property-contact-sidebar";
+import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 
 const statusBadgeStyles: Record<string, string> = {
   forSale: "bg-blue-100 text-blue-800 border-blue-200",
@@ -34,7 +27,6 @@ export default function PublicPropertyDetails() {
   const [isLoading, setIsLoading] = useState(true);
   const [profileData, setProfileData] = useState<{ id: string; name: string | null; company_name: string | null } | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [showContactForm, setShowContactForm] = useState(false);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [initialImageIndex, setInitialImageIndex] = useState(0);
 
@@ -262,124 +254,14 @@ export default function PublicPropertyDetails() {
               </div>
             )}
 
-            <div className="mt-8 space-y-6">
-              <h1 className="text-3xl font-bold font-montserrat text-propulse-700">{property.title}</h1>
-              <div className="flex items-center gap-2 text-muted-foreground text-base">
-                <MapPin className="h-5 w-5" />
-                <span>{property.address}, {property.city}, {property.state}</span>
-              </div>
-              
-              <PropertyInfoCards
-                bedrooms={property.bedrooms}
-                bathrooms={property.bathrooms}
-                parkingSpaces={property.parkingSpaces}
-                area={property.area}
-              />
-              
-              <Card className="rounded-xl bg-white/90 shadow p-0 animate-fade-in">
-                <CardHeader>
-                  <CardTitle className="text-propulse-700 text-xl mb-1">Descrição</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="whitespace-pre-wrap text-base text-gray-700">
-                    {property.description || "Nenhuma descrição disponível"}
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="rounded-xl bg-white/90 shadow p-0 animate-fade-in">
-                <CardHeader>
-                  <CardTitle className="text-propulse-700 text-xl mb-1">Informações adicionais</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Tipo de imóvel</p>
-                      <p className="text-base font-medium">{formatPropertyType(property.type)}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Status</p>
-                      <p className="text-base font-medium">{formatStatusText(property.status)}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Cidade</p>
-                      <p className="text-base font-medium">{property.city}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Estado</p>
-                      <p className="text-base font-medium">{property.state}</p>
-                    </div>
-                    {property.zipCode && (
-                      <div>
-                        <p className="text-xs text-muted-foreground">CEP</p>
-                        <p className="text-base font-medium">{property.zipCode}</p>
-                      </div>
-                    )}
-                    <div>
-                      <p className="text-xs text-muted-foreground">Publicado em</p>
-                      <p className="text-base font-medium">{new Date(property.createdAt).toLocaleDateString('pt-BR')}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <PropertyDetailsContent property={property} />
           </div>
           
-          <div className="lg:col-span-1 mt-6 lg:mt-0 animate-fade-in">
-            <div className="sticky top-8 space-y-6">
-              <Card className="bg-white/95 shadow-lg rounded-xl animate-fade-in">
-                <CardHeader className="border-b">
-                  <CardTitle className="text-2xl font-bold text-propulse-700">
-                    {property.status === 'forSale' ? 'Compre por' : 'Alugue por'}
-                  </CardTitle>
-                  <p className="text-3xl font-extrabold text-propulse-600 mt-1">
-                    R$ {property.price.toLocaleString('pt-BR')}
-                  </p>
-                  {property.status === 'forRent' && <p className="text-xs text-muted-foreground">por mês</p>}
-                </CardHeader>
-                <CardContent className="pt-6">
-                  <p className="text-center mb-6 text-base">
-                    Interessado neste imóvel? Entre em contato!
-                  </p>
-                  
-                  {showContactForm ? (
-                    <PropertyContactForm 
-                      propertyId={property.id} 
-                      userId={profileData.id}
-                      propertyTitle={property.title}
-                      propertyPrice={property.price}
-                      propertyRegion={`${property.address}, ${property.city}, ${property.state}`}
-                      onClose={() => setShowContactForm(false)}
-                    />
-                  ) : (
-                    <Button 
-                      className="w-full bg-propulse-600 hover:bg-propulse-700 text-white font-semibold text-lg animate-fade-in"
-                      onClick={() => setShowContactForm(true)}
-                    >
-                      Tenho Interesse
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-              
-              <Card className="rounded-xl shadow bg-white/95 py-2 px-2 animate-fade-in">
-                <CardHeader>
-                  <CardTitle className="text-propulse-700 text-lg">Sobre o anunciante</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center">
-                    <h3 className="font-semibold text-base">{profileData.company_name || profileData.name}</h3>
-                    <p className="text-xs text-muted-foreground mt-1">Consulte esse e outros imóveis no catálogo</p>
-                    <Link to={`/catalogo/${slug}`} className="block mt-4">
-                      <Button variant="outline" className="w-full border-propulse-300 text-propulse-700 hover:bg-propulse-50 font-medium shadow-sm">
-                        Ver catálogo completo
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+          <PropertyContactSidebar 
+            property={property}
+            profileData={profileData}
+            slug={slug!}
+          />
         </div>
       </main>
       

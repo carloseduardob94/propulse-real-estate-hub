@@ -59,6 +59,11 @@ export function LeadCard({ lead }: LeadCardProps) {
             </div>
             <div>
               <CardTitle className="text-lg">{lead.name}</CardTitle>
+              {lead.propertyType.length > 0 && (
+                <p className="text-sm text-muted-foreground mb-1">
+                  Interesse: {lead.propertyType.join(", ")}
+                </p>
+              )}
               <div className="flex items-center gap-2 mt-1">
                 <span className={`px-2 py-0.5 rounded-full text-xs ${getStatusBadgeClass(lead.status)}`}>
                   {getStatusLabel(lead.status)}
@@ -115,3 +120,4 @@ export function LeadCard({ lead }: LeadCardProps) {
     </Card>
   );
 }
+

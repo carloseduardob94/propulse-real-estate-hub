@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,7 +15,7 @@ import PropertyCatalog from "./pages/PropertyCatalog";
 import LeadsPage from "./pages/LeadsPage";
 import ProposalsPage from "./pages/ProposalsPage";
 import PlansPage from "./pages/PlansPage";
-import AuthPage from "./pages/AuthPage";
+import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
 import PublicCatalog from "./pages/PublicCatalog";
 
@@ -72,7 +73,7 @@ const App = () => {
             <Route 
               path="/login" 
               element={
-                session ? <Navigate to="/dashboard" replace /> : <AuthPage />
+                session ? <Navigate to="/dashboard" replace /> : <LoginPage />
               } 
             />
             <Route 

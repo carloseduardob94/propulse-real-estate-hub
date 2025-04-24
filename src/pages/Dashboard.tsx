@@ -62,14 +62,14 @@ const Dashboard = () => {
     email: "", 
     plan: "free",
     avatar_url: null,
-    company_name: null
+    company_name: null,
+    whatsapp: null
   });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   const [showPropertyForm, setShowPropertyForm] = useState(false);
   const [showLeadForm, setShowLeadForm] = useState(false);
 
-  // Use useEffect to ensure we have the user before querying for properties
   useEffect(() => {
     const getUserProfile = async () => {
       try {
@@ -96,7 +96,8 @@ const Dashboard = () => {
             email: userData.email || "sem email",
             plan: (profile?.plan as "free" | "monthly" | "yearly") || "free",
             avatar_url: profile?.avatar_url || null,
-            company_name: profile?.company_name || null
+            company_name: profile?.company_name || null,
+            whatsapp: profile?.whatsapp || null
           });
         }
       } catch (error) {
@@ -107,13 +108,11 @@ const Dashboard = () => {
     getUserProfile();
   }, [navigate]);
 
-  // Updated to use the current user ID when fetching properties
   const { data: properties = [], isLoading: propertiesLoading } = useQuery({
     queryKey: ['properties', user.id],
     queryFn: async () => {
       console.log("Fetching properties for user:", user.id);
       
-      // Don't fetch if we don't have a user ID yet
       if (!user.id) {
         console.log("No user ID available, returning empty array");
         return [];
@@ -133,10 +132,9 @@ const Dashboard = () => {
       console.log(`Found ${data.length} properties for user ${user.id}`);
       return data.map(transformPropertyFromDB) as Property[];
     },
-    enabled: !!user.id, // Only run query when user ID is available
+    enabled: !!user.id,
   });
 
-  // Similarly update the leads query
   const { data: leads = [], isLoading: leadsLoading } = useQuery({
     queryKey: ['leads', user.id],
     queryFn: async () => {

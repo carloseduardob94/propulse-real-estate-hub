@@ -3,30 +3,29 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { UserProfile } from "@/types/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { ProposalList } from "@/components/proposals/ProposalList";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { useToast } from "@/hooks/use-toast";
+import { ProposalList } from "@/components/proposals/ProposalList";
 
 export default function ProposalsPage() {
-  const [proposals, setProposals] = useState<any[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [user, setUser] = useState<UserProfile>({ 
+  const [isLoading, setIsLoading] = useState(true);
+  const [proposals, setProposals] = useState([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [user, setUser] = useState<UserProfile>({
     id: "",
     name: "", 
     email: "", 
     plan: "free",
     avatar_url: null,
-    company_name: null
+    company_name: null,
+    whatsapp: null
   });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
 
   useEffect(() => {
     const getUserProfile = async () => {
@@ -50,7 +49,8 @@ export default function ProposalsPage() {
               email: userData.email || "sem email",
               plan: (profile?.plan as "free" | "monthly" | "yearly") || "free",
               avatar_url: profile?.avatar_url || null,
-              company_name: profile?.company_name || null
+              company_name: profile?.company_name || null,
+              whatsapp: profile?.whatsapp || null
             });
 
             fetchProposals(userData.id);

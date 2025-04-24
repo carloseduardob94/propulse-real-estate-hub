@@ -24,7 +24,8 @@ export default function LeadsPage() {
     email: "", 
     plan: "free",
     avatar_url: null,
-    company_name: null
+    company_name: null,
+    whatsapp: null
   });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -52,7 +53,8 @@ export default function LeadsPage() {
               email: userData.email || "sem email",
               plan: (profile?.plan as "free" | "monthly" | "yearly") || "free",
               avatar_url: profile?.avatar_url || null,
-              company_name: profile?.company_name || null
+              company_name: profile?.company_name || null,
+              whatsapp: profile?.whatsapp || null
             });
 
             fetchLeads(userData.id);

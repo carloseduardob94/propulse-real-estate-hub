@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { LeadForm } from "@/components/ui/lead-form";
@@ -40,7 +41,8 @@ const Index = () => {
             email: data.session.user.email || '',
             avatar_url: profile.avatar_url,
             company_name: profile.company_name,
-            plan: (profile.plan as "free" | "monthly" | "yearly") || "free"
+            plan: (profile.plan as "free" | "monthly" | "yearly") || "free",
+            whatsapp: profile.whatsapp || null
           });
         } else {
           // Fallback if no profile exists
@@ -50,7 +52,8 @@ const Index = () => {
             email: data.session.user.email || '',
             avatar_url: null,
             company_name: null,
-            plan: "free"
+            plan: "free",
+            whatsapp: null
           });
         }
       }
@@ -78,7 +81,8 @@ const Index = () => {
               email: session.user.email || '',
               avatar_url: profile.avatar_url,
               company_name: profile.company_name,
-              plan: (profile.plan as "free" | "monthly" | "yearly") || "free"
+              plan: (profile.plan as "free" | "monthly" | "yearly") || "free",
+              whatsapp: profile.whatsapp || null
             });
           } else {
             setUser({
@@ -87,7 +91,8 @@ const Index = () => {
               email: session.user.email || '',
               avatar_url: null,
               company_name: null,
-              plan: "free"
+              plan: "free",
+              whatsapp: null
             });
           }
         } else {

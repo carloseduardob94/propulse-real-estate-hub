@@ -16,6 +16,8 @@ export default function ProposalsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [proposals, setProposals] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [user, setUser] = useState<UserProfile>({
     id: "",
     name: "", 

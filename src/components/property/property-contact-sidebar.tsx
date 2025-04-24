@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -44,6 +43,7 @@ export function PropertyContactSidebar({ property, profileData, slug }: Property
                 propertyTitle={property.title}
                 propertyPrice={property.price}
                 propertyRegion={`${property.address}, ${property.city}, ${property.state}`}
+                slug={slug}
                 onClose={() => setShowContactForm(false)}
               />
             ) : (

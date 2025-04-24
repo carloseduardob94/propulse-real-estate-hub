@@ -13,10 +13,19 @@ interface PropertyContactFormProps {
   propertyTitle: string;
   propertyPrice?: number;
   propertyRegion?: string;
+  slug: string; // Adicionado o slug do corretor
   onClose?: () => void;
 }
 
-export function PropertyContactForm({ propertyId, userId, propertyTitle, propertyPrice, propertyRegion, onClose }: PropertyContactFormProps) {
+export function PropertyContactForm({ 
+  propertyId, 
+  userId, 
+  propertyTitle, 
+  propertyPrice, 
+  propertyRegion,
+  slug,
+  onClose 
+}: PropertyContactFormProps) {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
@@ -29,6 +38,34 @@ export function PropertyContactForm({ propertyId, userId, propertyTitle, propert
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const sendToWebhook = async (leadData: any) => {
+    try {
+      const response = await fetch('http://localhost:5678/webhook-test/im-interested-property', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: leadData.name,
+          email: leadData.email,
+          phone: leadData.phone,
+          message: leadData.message,
+          propertyId: leadData.propertyId,
+          brokerSlug: leadData.brokerSlug
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao enviar dados para o webhook');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Erro no webhook:', error);
+      throw error;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,21 +82,31 @@ export function PropertyContactForm({ propertyId, userId, propertyTitle, propert
       const observacoes = formData.message ? formData.message : "";
 
       // Envia lead para o banco
-      const { error } = await supabase.from('leads').insert([
+      const { error: dbError } = await supabase.from('leads').insert([
         {
           name: formData.name,
           email: formData.email,
           phone: formData.whatsapp,
           message: observacoes,
           user_id: userId,
-          property_type: [propertyTitle], // compatibilidade
+          property_type: [propertyTitle],
           preferred_location: propertyRegion || "Interesse via catálogo público",
           status: "new",
           budget: propertyPrice ?? 0,
         },
       ]);
 
-      if (error) throw error;
+      if (dbError) throw dbError;
+
+      // Envia para o webhook
+      await sendToWebhook({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.whatsapp,
+        message: observacoes,
+        propertyId,
+        brokerSlug: slug
+      });
 
       toast({
         title: "Mensagem enviada com sucesso!",
@@ -156,4 +203,3 @@ export function PropertyContactForm({ propertyId, userId, propertyTitle, propert
     </form>
   );
 }
-

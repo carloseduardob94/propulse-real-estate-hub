@@ -15,7 +15,7 @@ import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { PropertySection } from "@/components/dashboard/property-section";
 import { LeadSection } from "@/components/dashboard/lead-section";
 import { PremiumPromotion } from "@/components/dashboard/premium-promotion";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const transformPropertyFromDB = (property: any): Property => ({
   id: property.id,
@@ -56,6 +56,7 @@ const transformLeadFromDB = (lead: any): Lead => ({
 const Dashboard = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<UserProfile>({ 
     id: "",
     name: "", 
@@ -106,7 +107,7 @@ const Dashboard = () => {
     };
     
     getUserProfile();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const { data: properties = [], isLoading: propertiesLoading } = useQuery({
     queryKey: ['properties', user.id],
@@ -194,6 +195,8 @@ const Dashboard = () => {
 
       if (error) throw error;
 
+      await queryClient.invalidateQueries({ queryKey: ['leads', user.id] });
+
       toast({
         title: "Lead cadastrado com sucesso!",
         description: "O lead foi adicionado à sua lista.",
@@ -233,6 +236,8 @@ const Dashboard = () => {
         .insert([dbData]);
 
       if (error) throw error;
+
+      await queryClient.invalidateQueries({ queryKey: ['properties', user.id] });
 
       toast({
         title: "Imóvel cadastrado com sucesso!",

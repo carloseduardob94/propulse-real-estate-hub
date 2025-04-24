@@ -66,12 +66,28 @@ export function useProfile() {
           plan: (profile.plan as "free" | "monthly" | "yearly") || "free"
         });
         
+        // Format the WhatsApp number for display if it exists
+        let displayWhatsapp = '';
+        if (profile.whatsapp) {
+          const phoneNumber = profile.whatsapp.replace(/\D/g, '');
+          if (phoneNumber.length > 2) {
+            displayWhatsapp = `(${phoneNumber.substring(0, 2)})`;
+            if (phoneNumber.length > 7) {
+              displayWhatsapp = `(${phoneNumber.substring(0, 2)}) ${phoneNumber.substring(2, 7)}-${phoneNumber.substring(7)}`;
+            } else {
+              displayWhatsapp += phoneNumber.substring(2);
+            }
+          } else {
+            displayWhatsapp = phoneNumber;
+          }
+        }
+        
         setFormData({
           name: profile.name || authUser.user_metadata?.name || '',
           email: authUser.email || '',
           company_name: profile.company_name || '',
           avatar_url: profile.avatar_url || '',
-          whatsapp: profile.whatsapp || '',
+          whatsapp: displayWhatsapp,
         });
       } else {
         const defaultUser = {
@@ -165,7 +181,7 @@ export function useProfile() {
       }
 
       // Formatando o WhatsApp para remover caracteres especiais antes de salvar
-      const whatsappFormatted = formData.whatsapp.replace(/\D/g, '');
+      const whatsappFormatted = formData.whatsapp ? formData.whatsapp.replace(/\D/g, '') : '';
       
       const generateSlug = (name: string) => {
         return name.toLowerCase()
@@ -205,12 +221,33 @@ export function useProfile() {
         throw error;
       }
       
+      // After successful save, update the user state with formatted WhatsApp
+      let displayWhatsapp = '';
+      if (whatsappFormatted) {
+        if (whatsappFormatted.length > 2) {
+          displayWhatsapp = `(${whatsappFormatted.substring(0, 2)})`;
+          if (whatsappFormatted.length > 7) {
+            displayWhatsapp = `(${whatsappFormatted.substring(0, 2)}) ${whatsappFormatted.substring(2, 7)}-${whatsappFormatted.substring(7)}`;
+          } else {
+            displayWhatsapp += whatsappFormatted.substring(2);
+          }
+        } else {
+          displayWhatsapp = whatsappFormatted;
+        }
+      }
+
       setUser(prev => ({
         ...prev!,
         name: formData.name,
         company_name: formData.company_name,
         avatar_url: formData.avatar_url,
-        whatsapp: formData.whatsapp,
+        whatsapp: whatsappFormatted,
+      }));
+
+      // Update the form with properly formatted display value
+      setFormData(prev => ({
+        ...prev,
+        whatsapp: displayWhatsapp,
       }));
       
       toast({

@@ -6,5 +6,6 @@ export interface UserProfile {
   email: string;
   company_name: string | null;
   plan: 'free' | 'monthly' | 'yearly' | null;
-  slug?: string; // Add slug field
+  whatsapp: string | null;
+  slug?: string;
 }

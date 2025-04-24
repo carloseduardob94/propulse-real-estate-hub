@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -15,6 +14,9 @@ const formSchema = z.object({
   name: z.string().min(3, { message: "O nome deve ter pelo menos 3 caracteres" }),
   email: z.string().email({ message: "E-mail inválido" }),
   companyName: z.string().optional(),
+  whatsapp: z.string().regex(/^\([0-9]{2}\) 9[0-9]{4}-[0-9]{4}$/, {
+    message: "WhatsApp inválido. Use o formato: (11) 91234-5678",
+  }),
   password: z.string().min(6, { message: "A senha deve ter pelo menos 6 caracteres" }),
   confirmPassword: z.string().min(6, { message: "A confirmação de senha deve ter pelo menos 6 caracteres" }),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -107,6 +109,19 @@ export function RegisterForm({ onSubmit, onLoginClick, isLoading = false, classN
               disabled={isLoading}
               {...form.register("companyName")}
             />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="whatsapp">WhatsApp</Label>
+            <Input
+              id="whatsapp"
+              placeholder="(11) 91234-5678"
+              disabled={isLoading}
+              {...form.register("whatsapp")}
+            />
+            {form.formState.errors.whatsapp && (
+              <p className="text-sm text-red-500">{form.formState.errors.whatsapp.message}</p>
+            )}
           </div>
           
           <div className="space-y-2">

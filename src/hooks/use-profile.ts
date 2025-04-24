@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "@supabase/supabase-js";
@@ -11,6 +10,7 @@ interface ProfileFormData {
   email: string;
   company_name: string;
   avatar_url: string;
+  whatsapp: string;
 }
 
 export function useProfile() {
@@ -22,6 +22,7 @@ export function useProfile() {
     email: '',
     company_name: '',
     avatar_url: '',
+    whatsapp: '',
   });
   
   const { toast } = useToast();
@@ -60,6 +61,7 @@ export function useProfile() {
           email: authUser.email || '',
           avatar_url: profile.avatar_url,
           company_name: profile.company_name,
+          whatsapp: profile.whatsapp,
           plan: (profile.plan as "free" | "monthly" | "yearly") || "free"
         });
         
@@ -68,6 +70,7 @@ export function useProfile() {
           email: authUser.email || '',
           company_name: profile.company_name || '',
           avatar_url: profile.avatar_url || '',
+          whatsapp: profile.whatsapp || '',
         });
       } else {
         const defaultUser = {
@@ -76,7 +79,8 @@ export function useProfile() {
           email: authUser.email || '',
           avatar_url: null,
           company_name: null,
-          plan: "free" as const
+          plan: "free" as const,
+          whatsapp: null,
         };
         
         setUser(defaultUser);
@@ -85,6 +89,7 @@ export function useProfile() {
           email: authUser.email || '',
           company_name: '',
           avatar_url: '',
+          whatsapp: '',
         });
         
         await createInitialProfile(authUser);
@@ -134,6 +139,11 @@ export function useProfile() {
       if (!user) {
         throw new Error('Usuário não autenticado.');
       }
+
+      // Validar formato do WhatsApp
+      if (formData.whatsapp && !/^\([0-9]{2}\) 9[0-9]{4}-[0-9]{4}$/.test(formData.whatsapp)) {
+        throw new Error('Formato de WhatsApp inválido. Use: (11) 91234-5678');
+      }
       
       const generateSlug = (name: string) => {
         return name.toLowerCase()
@@ -153,6 +163,7 @@ export function useProfile() {
         name: formData.name,
         company_name: formData.company_name,
         avatar_url: formData.avatar_url,
+        whatsapp: formData.whatsapp,
         slug: slug,
         updated_at: new Date().toISOString(),
       };
@@ -177,6 +188,7 @@ export function useProfile() {
         name: formData.name,
         company_name: formData.company_name,
         avatar_url: formData.avatar_url,
+        whatsapp: formData.whatsapp,
       }));
       
       toast({

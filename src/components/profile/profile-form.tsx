@@ -1,4 +1,3 @@
-
 import { UserProfile } from "@/types/auth";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { Input } from "@/components/ui/input";
@@ -16,6 +15,7 @@ interface ProfileFormProps {
     email: string;
     company_name: string;
     avatar_url: string;
+    whatsapp: string;
   };
   onFormChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onAvatarUpload: (url: string | null) => void;
@@ -87,6 +87,18 @@ export function ProfileForm({
           name="name"
           value={formData.name} 
           onChange={onFormChange} 
+        />
+      </div>
+      
+      <div className="grid gap-2">
+        <Label htmlFor="whatsapp">WhatsApp</Label>
+        <Input 
+          type="text" 
+          id="whatsapp" 
+          name="whatsapp"
+          value={formData.whatsapp || ''} 
+          onChange={onFormChange}
+          placeholder="(11) 91234-5678"
         />
       </div>
       

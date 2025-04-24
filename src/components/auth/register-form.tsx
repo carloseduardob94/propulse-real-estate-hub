@@ -7,16 +7,19 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, Phone } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   name: z.string().min(3, { message: "O nome deve ter pelo menos 3 caracteres" }),
   email: z.string().email({ message: "E-mail inválido" }),
   companyName: z.string().optional(),
-  whatsapp: z.string().regex(/^\([0-9]{2}\) 9[0-9]{4}-[0-9]{4}$/, {
-    message: "WhatsApp inválido. Use o formato: (11) 91234-5678",
-  }),
+  whatsapp: z.string()
+    .min(14, { message: "WhatsApp deve ter 11 dígitos (incluindo DDD)" })
+    .max(15, { message: "WhatsApp inválido" })
+    .regex(/^\([0-9]{2}\) 9[0-9]{4}-[0-9]{4}$/, {
+      message: "WhatsApp inválido. Use o formato: (11) 91234-5678",
+    }),
   password: z.string().min(6, { message: "A senha deve ter pelo menos 6 caracteres" }),
   confirmPassword: z.string().min(6, { message: "A confirmação de senha deve ter pelo menos 6 caracteres" }),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -45,10 +48,21 @@ export function RegisterForm({ onSubmit, onLoginClick, isLoading = false, classN
       name: "",
       email: "",
       companyName: "",
+      whatsapp: "",
       password: "",
       confirmPassword: "",
     },
   });
+
+  const handleWhatsAppChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value.replace(/\D/g, '');
+    const formattedInput = input.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+    
+    form.setValue('whatsapp', formattedInput, { 
+      shouldValidate: true, 
+      shouldDirty: true 
+    });
+  };
 
   const handleSubmit = async (values: FormValues) => {
     try {
@@ -112,12 +126,16 @@ export function RegisterForm({ onSubmit, onLoginClick, isLoading = false, classN
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="whatsapp">WhatsApp</Label>
+            <Label htmlFor="whatsapp" className="flex items-center">
+              <Phone className="h-4 w-4 mr-2" /> WhatsApp
+            </Label>
             <Input
               id="whatsapp"
               placeholder="(11) 91234-5678"
               disabled={isLoading}
               {...form.register("whatsapp")}
+              onChange={handleWhatsAppChange}
+              maxLength={15}
             />
             {form.formState.errors.whatsapp && (
               <p className="text-sm text-red-500">{form.formState.errors.whatsapp.message}</p>

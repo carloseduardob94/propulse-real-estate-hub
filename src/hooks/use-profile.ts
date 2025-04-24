@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "@supabase/supabase-js";
@@ -152,11 +151,14 @@ export function useProfile() {
         let formattedInput = input;
         
         if (input.length > 2) {
-          formattedInput = `(${input.substring(0, 2)})${input.substring(2)}`;
-        }
-        
-        if (input.length > 7) {
-          formattedInput = `(${input.substring(0, 2)}) ${input.substring(2, 7)}-${input.substring(7)}`;
+          formattedInput = `(${input.substring(0, 2)})`;
+          if (input.length > 7) {
+            formattedInput = `(${input.substring(0, 2)}) ${input.substring(2, 7)}-${input.substring(7)}`;
+          } else {
+            formattedInput += input.substring(2);
+          }
+        } else {
+          formattedInput = input;
         }
         
         setFormData(prev => ({
@@ -183,6 +185,12 @@ export function useProfile() {
       // Formatando o WhatsApp para remover caracteres especiais antes de salvar
       const whatsappFormatted = formData.whatsapp ? formData.whatsapp.replace(/\D/g, '') : '';
       
+      // Validar o formato do WhatsApp conforme a restrição do banco de dados
+      // Se o campo whatsapp for preenchido, ele deve ter entre 10 e 11 dígitos
+      if (whatsappFormatted && (whatsappFormatted.length < 10 || whatsappFormatted.length > 11)) {
+        throw new Error('O número de WhatsApp deve ter 10 ou 11 dígitos incluindo o DDD.');
+      }
+      
       const generateSlug = (name: string) => {
         return name.toLowerCase()
           .replace(/\s+/g, '-')
@@ -201,7 +209,7 @@ export function useProfile() {
         name: formData.name,
         company_name: formData.company_name,
         avatar_url: formData.avatar_url,
-        whatsapp: whatsappFormatted, // Salvando apenas os números
+        whatsapp: whatsappFormatted || null, // Se vazio, salvar como null
         slug: slug,
         updated_at: new Date().toISOString(),
       };
@@ -241,7 +249,7 @@ export function useProfile() {
         name: formData.name,
         company_name: formData.company_name,
         avatar_url: formData.avatar_url,
-        whatsapp: whatsappFormatted,
+        whatsapp: whatsappFormatted || null,
       }));
 
       // Update the form with properly formatted display value

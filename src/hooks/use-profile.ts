@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "@supabase/supabase-js";
@@ -126,10 +127,33 @@ export function useProfile() {
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    
+    // Aplicando formatação especial para o campo whatsapp
+    if (name === 'whatsapp') {
+      const input = value.replace(/\D/g, '');
+      
+      if (input.length <= 11) {
+        let formattedInput = input;
+        
+        if (input.length > 2) {
+          formattedInput = `(${input.substring(0, 2)})${input.substring(2)}`;
+        }
+        
+        if (input.length > 7) {
+          formattedInput = `(${input.substring(0, 2)}) ${input.substring(2, 7)}-${input.substring(7)}`;
+        }
+        
+        setFormData(prev => ({
+          ...prev,
+          [name]: formattedInput,
+        }));
+      }
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSave = async () => {
@@ -140,10 +164,8 @@ export function useProfile() {
         throw new Error('Usuário não autenticado.');
       }
 
-      // Validar formato do WhatsApp
-      if (formData.whatsapp && !/^\([0-9]{2}\) 9[0-9]{4}-[0-9]{4}$/.test(formData.whatsapp)) {
-        throw new Error('Formato de WhatsApp inválido. Use: (11) 91234-5678');
-      }
+      // Formatando o WhatsApp para remover caracteres especiais antes de salvar
+      const whatsappFormatted = formData.whatsapp.replace(/\D/g, '');
       
       const generateSlug = (name: string) => {
         return name.toLowerCase()
@@ -163,7 +185,7 @@ export function useProfile() {
         name: formData.name,
         company_name: formData.company_name,
         avatar_url: formData.avatar_url,
-        whatsapp: formData.whatsapp,
+        whatsapp: whatsappFormatted, // Salvando apenas os números
         slug: slug,
         updated_at: new Date().toISOString(),
       };

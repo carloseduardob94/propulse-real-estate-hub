@@ -45,18 +45,42 @@ export function useRegisterForm({ onSubmit, isLoading = false }: UseRegisterForm
 
   const handleWhatsAppChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value.replace(/\D/g, '');
-    const formattedInput = input.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
     
-    form.setValue('whatsapp', formattedInput, { 
-      shouldValidate: true, 
-      shouldDirty: true 
-    });
+    if (input.length <= 11) {
+      let formattedInput = input;
+      
+      if (input.length > 2) {
+        formattedInput = `(${input.substring(0, 2)})${input.substring(2)}`;
+      }
+      
+      if (input.length > 7) {
+        formattedInput = `(${input.substring(0, 2)}) ${input.substring(2, 7)}-${input.substring(7)}`;
+      }
+      
+      form.setValue('whatsapp', formattedInput, { 
+        shouldValidate: true, 
+        shouldDirty: true 
+      });
+    }
+  };
+
+  const generateAvatarUrl = (name: string): string => {
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
   };
 
   const handleSubmit = async (values: FormValues) => {
     try {
       if (onSubmit) {
-        await onSubmit(values);
+        // Gera um avatar automático baseado no nome
+        const avatarUrl = generateAvatarUrl(values.name);
+        
+        // Adicionamos o avatar_url aos metadados do usuário
+        const valuesWithAvatar = {
+          ...values,
+          avatar_url: avatarUrl
+        };
+        
+        await onSubmit(valuesWithAvatar as FormValues);
       }
     } catch (error: any) {
       toast({

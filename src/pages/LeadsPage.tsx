@@ -10,7 +10,7 @@ import { LeadList } from "@/components/leads/LeadList";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { useToast } from "@/hooks/use-toast";
 import { LeadForm } from "@/components/ui/lead-form";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);

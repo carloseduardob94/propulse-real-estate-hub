@@ -43,7 +43,7 @@ export function AvatarUpload({
       const filePath = `${userId}-${timestamp}.${fileExt}`;
 
       // Upload the file
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(filePath, file, {
           upsert: true,

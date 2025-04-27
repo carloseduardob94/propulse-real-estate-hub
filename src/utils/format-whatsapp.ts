@@ -22,7 +22,7 @@ export function formatWhatsappForStorage(phoneNumber: string | null): string | n
 }
 
 export function validateWhatsapp(phoneNumber: string | null): boolean {
-  if (!phoneNumber) return true;
+  if (!phoneNumber) return false; // WhatsApp is required
   const numbers = phoneNumber.replace(/\D/g, '');
   return numbers.length >= 10 && numbers.length <= 11;
 }

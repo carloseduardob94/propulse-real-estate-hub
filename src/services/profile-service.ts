@@ -34,6 +34,10 @@ export async function createInitialProfile(userId: string, userMetadata: any) {
 export async function updateProfile(userId: string, formData: any) {
   const whatsappFormatted = formatWhatsappForStorage(formData.whatsapp);
   
+  if (!whatsappFormatted) {
+    throw new Error('O campo WhatsApp é obrigatório.');
+  }
+
   if (!validateWhatsapp(whatsappFormatted)) {
     throw new Error('O número de WhatsApp deve ter 10 ou 11 dígitos incluindo o DDD.');
   }

@@ -7,6 +7,7 @@ import { Logo } from "@/components/brand/logo";
 import { AvatarUpload } from "@/components/auth/avatar-upload";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { formatWhatsappForStorage } from "@/utils/format-whatsapp";
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -44,7 +45,11 @@ const AuthPage = () => {
 
   const handleRegister = async (data: any) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      // Format whatsapp for storage
+      const formattedWhatsapp = formatWhatsappForStorage(data.whatsapp);
+      
+      // Register the user
+      const { error, data: authData } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
@@ -57,6 +62,21 @@ const AuthPage = () => {
       });
 
       if (error) throw error;
+
+      // If user registration is successful, update profiles table with whatsapp
+      if (authData.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            whatsapp: formattedWhatsapp,
+            avatar_url: avatarUrl
+          })
+          .eq('id', authData.user.id);
+        
+        if (profileError) {
+          console.error("Error updating profile:", profileError);
+        }
+      }
       
       toast({
         title: "Cadastro realizado com sucesso!",

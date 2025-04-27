@@ -9,9 +9,11 @@ import { AvatarUpload } from "@/components/auth/avatar-upload";
 import { supabase } from "@/integrations/supabase/client";
 import { Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { formatWhatsappForStorage } from "@/utils/format-whatsapp";
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
@@ -72,18 +74,38 @@ const LoginPage = () => {
   const handleRegister = async (data: any) => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signUp({
+      
+      // Format whatsapp for storage
+      const formattedWhatsapp = formatWhatsappForStorage(data.whatsapp);
+      
+      const { error, data: authData } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
           data: {
             name: data.name,
             company_name: data.companyName,
+            avatar_url: avatarUrl,
           },
         },
       });
 
       if (error) throw error;
+
+      // If user registration is successful, update profiles table with whatsapp
+      if (authData.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            whatsapp: formattedWhatsapp,
+            avatar_url: avatarUrl
+          })
+          .eq('id', authData.user.id);
+        
+        if (profileError) {
+          console.error("Error updating profile:", profileError);
+        }
+      }
 
       toast({
         title: "Cadastro realizado com sucesso!",

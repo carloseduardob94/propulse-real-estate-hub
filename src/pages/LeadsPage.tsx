@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
@@ -11,6 +10,7 @@ import { LeadList } from "@/components/leads/LeadList";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { useToast } from "@/hooks/use-toast";
 import { LeadForm } from "@/components/ui/lead-form";
+import { useQueryClient } from "react-query";
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -18,6 +18,7 @@ export default function LeadsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<UserProfile>({
     id: "",
     name: "", 
@@ -157,8 +158,7 @@ export default function LeadsPage() {
         description: "Lead cadastrado com sucesso"
       });
       
-      // Reload leads
-      fetchLeads(user.id);
+      await queryClient.invalidateQueries({ queryKey: ['leads', user.id] });
       setIsDialogOpen(false);
     } catch (error) {
       console.error("Error adding lead:", error);

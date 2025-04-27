@@ -13,6 +13,7 @@ import { PropertyDialog } from "@/components/property/property-dialog";
 import { useProperties } from "@/hooks/use-properties";
 import { PropertyFilterProvider, usePropertyFilters } from "@/components/property/property-filter-context";
 import { PropertyCatalogHeader } from "@/components/property/property-catalog-header";
+import { useQueryClient } from "@tanstack/react-query";
 
 function PropertyContent({ properties, isLoading }: { properties: any[], isLoading: boolean }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -73,6 +74,7 @@ function PropertyContent({ properties, isLoading }: { properties: any[], isLoadi
 export default function PropertyCatalog() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -190,6 +192,11 @@ export default function PropertyCatalog() {
     setShowFilters(prev => !prev);
   };
 
+  const handleSuccessfulSubmit = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['properties', user.id] });
+    setIsDialogOpen(false);
+  };
+
   const actionButton = (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
@@ -201,6 +208,7 @@ export default function PropertyCatalog() {
       <PropertyDialog 
         isOpen={isDialogOpen}
         onOpenChange={setIsDialogOpen}
+        onSuccess={handleSuccessfulSubmit}
       />
     </Dialog>
   );

@@ -9,9 +9,10 @@ import { supabase } from "@/integrations/supabase/client";
 interface PropertyDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
-export function PropertyDialog({ isOpen, onOpenChange }: PropertyDialogProps) {
+export function PropertyDialog({ isOpen, onOpenChange, onSuccess }: PropertyDialogProps) {
   const [userId, setUserId] = useState<string>("");
   const { addProperty } = useProperties(userId);
   const { toast } = useToast();
@@ -31,6 +32,9 @@ export function PropertyDialog({ isOpen, onOpenChange }: PropertyDialogProps) {
   const handleSubmit = async (data: any) => {
     try {
       await addProperty(data);
+      if (onSuccess) {
+        await onSuccess();
+      }
       onOpenChange(false); // Close dialog on success
     } catch (error) {
       console.error("Error adding property:", error);

@@ -1,24 +1,17 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { UserProfile } from "@/types/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { Lead } from "@/types";
 import { LeadList } from "@/components/leads/LeadList";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { useToast } from "@/hooks/use-toast";
-import { LeadForm } from "@/components/ui/lead-form";
-import { useQueryClient } from "@tanstack/react-query";
+import { useLeads } from "@/hooks/use-leads";
+import { AddLeadDialog } from "@/components/leads/AddLeadDialog";
+import { UserProfile } from "@/types/auth";
 
 export default function LeadsPage() {
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [user, setUser] = useState<UserProfile>({
     id: "",
     name: "", 
@@ -31,6 +24,8 @@ export default function LeadsPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
+
+  const { leads, isLoading, fetchLeads } = useLeads(user.id);
 
   useEffect(() => {
     const getUserProfile = async () => {
@@ -58,7 +53,7 @@ export default function LeadsPage() {
               whatsapp: profile?.whatsapp || null
             });
 
-            fetchLeads(userData.id);
+            fetchLeads();
           }
         } else {
           navigate('/login');
@@ -74,46 +69,7 @@ export default function LeadsPage() {
     };
     
     getUserProfile();
-  }, [navigate, toast]);
-
-  const fetchLeads = async (userId: string) => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('leads')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-        
-      if (error) throw error;
-      
-      const typedLeads = data.map(lead => ({
-        id: lead.id,
-        name: lead.name,
-        email: lead.email,
-        phone: lead.phone || "",
-        message: lead.message || "",
-        budget: lead.budget || 0,
-        preferredLocation: lead.preferred_location || "",
-        propertyType: lead.property_type || [],
-        leadScore: lead.lead_score || 0,
-        status: lead.status as any || "new",
-        createdAt: lead.created_at,
-        updatedAt: lead.updated_at
-      }));
-      
-      setLeads(typedLeads);
-    } catch (error) {
-      console.error("Error fetching leads:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar seus leads",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [navigate, toast, fetchLeads]);
   
   const handleLogout = async () => {
     try {
@@ -136,60 +92,6 @@ export default function LeadsPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleAddLead = async (data: any) => {
-    try {
-      const { error } = await supabase
-        .from('leads')
-        .insert({
-          user_id: user.id,
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
-          message: data.notes,
-          budget: data.budget ? parseFloat(data.budget) : null,
-          preferred_location: data.preferredLocation,
-          status: data.status,
-        });
-        
-      if (error) throw error;
-      
-      toast({
-        title: "Sucesso!",
-        description: "Lead cadastrado com sucesso"
-      });
-      
-      await queryClient.invalidateQueries({ queryKey: ['leads', user.id] });
-      setIsDialogOpen(false);
-    } catch (error) {
-      console.error("Error adding lead:", error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível cadastrar o lead",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const actionButton = (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger asChild>
-        <Button className="mt-4 md:mt-0">
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Lead
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Cadastrar novo lead</DialogTitle>
-          <DialogDescription>
-            Preencha as informações do lead para adicioná-lo ao sistema.
-          </DialogDescription>
-        </DialogHeader>
-        <LeadForm onSubmit={handleAddLead} />
-      </DialogContent>
-    </Dialog>
-  );
-
   return (
     <PageLayout
       isAuthenticated={isAuthenticated}
@@ -197,7 +99,7 @@ export default function LeadsPage() {
       onLogout={handleLogout}
       title="Leads"
       description="Gerenciamento e qualificação dos seus contatos"
-      actionButton={actionButton}
+      actionButton={<AddLeadDialog userId={user.id} />}
     >
       <LeadList
         leads={leads}
